@@ -1,3 +1,6 @@
+
+
+
 function main() {
   const canvas = document.querySelector("#glCanvas");
   // Initialize the GL context
@@ -25,6 +28,7 @@ function httpGetAsync(theUrl, callback) {
 }
 
 function updateTheCanvas() {
+  console.log("running")
   const canvas = document.querySelector("#glCanvas");
   const gl = canvas.getContext("webgl");
 
@@ -37,5 +41,6 @@ function iterate() {
   updateTheCanvas()
 }
 
+window.setInterval(iterate, 10000)
+console.log('LOOK HERE')
 window.onload = main;
-window.setInterval(iterate, 1000)
