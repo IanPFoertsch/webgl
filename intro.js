@@ -34,7 +34,7 @@ var initDemo = function() {
   // gl.viewport(0, 0, window.innerWidth, window.innerHeight)
 
 
-  gl.clearColor(0.75, 0.86, 0.8, 1.0)
+  gl.clearColor(0.0, 0.0, 0.0, 1.0)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
   //get WebGl ready to use shaders
@@ -81,18 +81,37 @@ var initDemo = function() {
   //Normal RAM variable that we'll supply to the graphics card program
   //We need to supply this RAM into a graphics card buffer memory
   // Now we need to add color to our vertices
-  var triangleVertices = [
-    //x, y
-    0.0, 0.5,   1.0, 1.0, 0.0,
-    -0.5, -0.5, 0.7, 0.3, 1.0,
-    0.5, -0.5,   0.0, 1.0, 1.0
-  ]
+  var a = [-0.5, 0.5]
+  var b = [-0.5, -0.5]
+  var c = [0.5, -0.5]
+  var d = [0.5, 0.5]
+  var randomColors = function() {
+    return [Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random())]
+  }
+  // var squareVertices = [
+  //   //x, y
+  //   -0.5, 0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
+  //   -0.5, -0.5, Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
+  //   0.5, -0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
+  //   0.5, 0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
+  // ]
 
-  var triangleVertexBufferObject = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject)
+  var createLine = function(origin, destination) {
+    return [origin, randomColors(), destination, randomColors()].flat()
+  }
+
+  vertices = [
+    createLine(a,b),
+    createLine(b,c),
+    createLine(c,d),
+    createLine(d,a)
+  ].flat(1)
+
+  var squareVertexBufferObject = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBufferObject)
   //Note: Javascript numbers are always 64 bit float precision numbers, so we need to converte
   //to 32 bit floats
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
@@ -113,16 +132,17 @@ var initDemo = function() {
     2, //number of elements per attribute
     gl.FLOAT, //Type of elements
     gl.FALSE,
-    5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (2 * (number of bytes per float)
+    5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (5 * (number of bytes per float)
     0 // offset from the bigining of a single vertex to this attribute
   )
 
+  //Tell webgl about the color of the vertex
   gl.vertexAttribPointer(
     colorAttributeLocation, //attribute location
     3, //number of elements per attribute
     gl.FLOAT, //Type of elements
     gl.FALSE,
-    5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (2 * (number of bytes per float)
+    5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (5 * (number of bytes per float)
     2 * Float32Array.BYTES_PER_ELEMENT // offset from the bigining of a single vertex to this attribute
   )
 
@@ -134,8 +154,7 @@ var initDemo = function() {
   //1: Type of thing we want to draw: usually triangles
   //2: number of vertexes we want to skip
   //3: number of vertexes we want to draw
-
-  gl.drawArrays(gl.TRIANGLES, 0, 3)
+  gl.drawArrays(gl.LINES, 0, 8)
 }
 
 
