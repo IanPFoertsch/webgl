@@ -1,4 +1,6 @@
 "use strict"
+
+import { rotate2d } from "./matrices.js"
 //precision mediump float -> determines precision of math inside the shader: medium ==
 //vec2, vec3, vec4 -> vector of x elements
 // gl_Position = vec4(vertexPosition, 0.0, 1.0) -> gives position of as a 4-vector
@@ -23,21 +25,46 @@ var fragmentShaderText = `
   }
 `
 
+function updateBufferData(canvasContext, vertices, buffer) {
+  canvasContext.bindBuffer(
+    canvasContext.ARRAY_BUFFER,
+    buffer
+  )
+  //Note: Javascript numbers are always 64 bit float precision numbers, so we need to converte
+  //to 32 bit floats
+  canvasContext.bufferData(
+    canvasContext.ARRAY_BUFFER,
+    new Float32Array(vertices),
+    canvasContext.STATIC_DRAW
+  )
+}
+
+var createLines = function(points) {
+  var randomColors = function() {
+    return [Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random())]
+  }
+  var createLine = function(origin, destination) {
+    return [origin, randomColors(), destination, randomColors()].flat()
+  }
+
+
+  var createLines = function(points) {
+    const length = points.length
+    return points.map((origin, index) => {
+      var destinationIndex = index === (length - 1) ? 0 : index + 1
+      var destinationPoint = points[destinationIndex]
+      return createLine(origin, destinationPoint)
+    })
+  }
+
+  return createLines(points).flat(1)
+}
+
 var initDemo = function() {
 
   var canvas = document.getElementById('glCanvas');
   const gl = canvas.getContext("webgl");
-
-  //We can dynamically resize the canvas if we'd like.
-  // canvas.width = window.innerWidth;
-  // canvas.height = window.innerHeight;
-  // gl.viewport - update the coordinate system for gl
-  // gl.viewport(0, 0, window.innerWidth, window.innerHeight)
-
-
-  gl.clearColor(0.0, 0.0, 0.0, 1.0)
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
+  console.log(gl)
   //get WebGl ready to use shaders
   //create a shader using WebGL api
   var vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -82,38 +109,18 @@ var initDemo = function() {
   //Normal RAM variable that we'll supply to the graphics card program
   //We need to supply this RAM into a graphics card buffer memory
   // Now we need to add color to our vertices
-  var a = [-0.5, 0.5]
-  var b = [-0.5, -0.5]
-  var c = [0.5, -0.5]
-  var d = [0.5, 0.5]
-  var randomColors = function() {
-    return [Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random())]
-  }
-  // var squareVertices = [
-  //   //x, y
-  //   -0.5, 0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
-  //   -0.5, -0.5, Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
-  //   0.5, -0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
-  //   0.5, 0.5,   Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()),
-  // ]
 
-  var createLine = function(origin, destination) {
-    return [origin, randomColors(), destination, randomColors()].flat()
-  }
+  var points = [
+    [-0.5, 0.5],
+    [-0.5, -0.5],
+    [0.5, -0.5],
+    [0.5, 0.5]
+  ]
+  var lines = createLines(points)
 
-  var vertices = [
-    createLine(a,b),
-    createLine(b,c),
-    createLine(c,d),
-    createLine(d,a)
-  ].flat(1)
+  var vertexBufferObject = gl.createBuffer()
 
-  var squareVertexBufferObject = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBufferObject)
-  //Note: Javascript numbers are always 64 bit float precision numbers, so we need to converte
-  //to 32 bit floats
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-
+  updateBufferData(gl, lines, vertexBufferObject)
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
   var positionAttributeLocation = gl.getAttribLocation(program, 'vertexPosition')
@@ -128,16 +135,18 @@ var initDemo = function() {
   // 4: gl.FALSE - don't worry about this for now
   // 5: size of an individual vertex in number of bytes
   // 6: offset from the beginning of a single vertex to this attribute
+
+
+  //Tell webgl about the color of the vertex
   gl.vertexAttribPointer(
     positionAttributeLocation, //attribute location
     2, //number of elements per attribute
     gl.FLOAT, //Type of elements
     gl.FALSE,
     5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (5 * (number of bytes per float)
-    0 // offset from the bigining of a single vertex to this attribute
+    0 // offset from the beginning of a single vertex to this attribute
   )
 
-  //Tell webgl about the color of the vertex
   gl.vertexAttribPointer(
     colorAttributeLocation, //attribute location
     3, //number of elements per attribute
@@ -150,33 +159,36 @@ var initDemo = function() {
   gl.enableVertexAttribArray(positionAttributeLocation)
   gl.enableVertexAttribArray(colorAttributeLocation)
   gl.useProgram(program)
+
   //Note this uses whatever active buffer we have at the moment.
-  //gl.drawArrays takes 3 params:
-  //1: Type of thing we want to draw: usually triangles
-  //2: number of vertexes we want to skip
-  //3: number of vertexes we want to draw
-
-
 
   var angle = 0;
-  var identityMatrix = new Float32Array(16)
-  gl.clearColor(0.0, 0.0, 0.0, 1.0)
-  gl.drawArrays(gl.LINES, 0, 8)
 
-  // var loop = function() {
+  var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
-    // angle = performance.now() / 1000 / 6 * 2 * Math.PI
-    // gl.drawArrays(gl.LINES, 0, 8)
+    angle = performance.now() / 100
 
-    // requestAnimationFrame(loop)
-  // }
+    var rotatedPoints = points.map((point) => {
+      return rotate2d(point, angle)
+    })
+
+    var newLines = createLines(rotatedPoints)
+
+    updateBufferData(gl, newLines, vertexBufferObject)
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.drawArrays(gl.LINES, 0, 8)
+
+    requestAnimationFrame(loop)
+  }
 
   //Note: requestAnimationFrame(func) will run func argument
   // whenever the screen is ready to draw a new image (60x/second)
   //Also, won't call function when tab isn't in focus, which is neat
   //if tab is backgrounded.
-  // requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 }
 
 export { initDemo }
