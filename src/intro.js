@@ -1,3 +1,4 @@
+"use strict"
 //precision mediump float -> determines precision of math inside the shader: medium ==
 //vec2, vec3, vec4 -> vector of x elements
 // gl_Position = vec4(vertexPosition, 0.0, 1.0) -> gives position of as a 4-vector
@@ -100,7 +101,7 @@ var initDemo = function() {
     return [origin, randomColors(), destination, randomColors()].flat()
   }
 
-  vertices = [
+  var vertices = [
     createLine(a,b),
     createLine(b,c),
     createLine(c,d),
@@ -154,8 +155,28 @@ var initDemo = function() {
   //1: Type of thing we want to draw: usually triangles
   //2: number of vertexes we want to skip
   //3: number of vertexes we want to draw
+
+
+
+  var angle = 0;
+  var identityMatrix = new Float32Array(16)
+  gl.clearColor(0.0, 0.0, 0.0, 1.0)
   gl.drawArrays(gl.LINES, 0, 8)
+
+  // var loop = function() {
+    //note: not a good idea to create variables inside loop due to memory
+    //allocation concerns
+    // angle = performance.now() / 1000 / 6 * 2 * Math.PI
+    // gl.drawArrays(gl.LINES, 0, 8)
+
+    // requestAnimationFrame(loop)
+  // }
+
+  //Note: requestAnimationFrame(func) will run func argument
+  // whenever the screen is ready to draw a new image (60x/second)
+  //Also, won't call function when tab isn't in focus, which is neat
+  //if tab is backgrounded.
+  // requestAnimationFrame(loop);
 }
 
-
-window.onload = initDemo;
+export { initDemo }
