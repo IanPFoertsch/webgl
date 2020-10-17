@@ -1,4 +1,8 @@
 "use strict"
 import { initDemo } from './intro.js'
 
-window.onload = initDemo;
+function setup() {
+  initDemo()
+}
+
+window.onload = setup;

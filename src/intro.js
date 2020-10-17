@@ -25,6 +25,27 @@ var fragmentShaderText = `
   }
 `
 
+var angle = 0
+window.addEventListener("keydown", function(event) {
+  if (event.defaultPrevented) {
+    return; // Do nothing if the event was already processed
+  }
+
+  switch (event.key) {
+    case "ArrowDown":
+      angle -= 1
+      break;
+    case "ArrowUp":
+      angle += 1
+      break;
+    default:
+      return; // Quit when this doesn't handle the key event.
+  }
+
+  // Cancel the default action to avoid it being handled twice
+  event.preventDefault();
+}, true)
+
 function updateBufferData(canvasContext, vertices, buffer) {
   canvasContext.bindBuffer(
     canvasContext.ARRAY_BUFFER,
@@ -162,12 +183,11 @@ var initDemo = function() {
 
   //Note this uses whatever active buffer we have at the moment.
 
-  var angle = 0;
+
 
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
-    angle = performance.now() / 100
 
     var rotatedPoints = points.map((point) => {
       return rotate2d(point, angle)
