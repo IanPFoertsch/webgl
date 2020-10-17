@@ -1,6 +1,7 @@
 "use strict"
 
 import { rotate2d } from "./matrices.js"
+import { BoxOutline } from "./box_outline.js"
 //precision mediump float -> determines precision of math inside the shader: medium ==
 //vec2, vec3, vec4 -> vector of x elements
 // gl_Position = vec4(vertexPosition, 0.0, 1.0) -> gives position of as a 4-vector
@@ -65,7 +66,7 @@ var createLines = function(points) {
     return [Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random())]
   }
   var createLine = function(origin, destination) {
-    return [origin, randomColors(), destination, randomColors()].flat()
+    return [origin, 1,1,1, destination, 1,1,1].flat()
   }
 
 
@@ -131,17 +132,12 @@ var initDemo = function() {
   //We need to supply this RAM into a graphics card buffer memory
   // Now we need to add color to our vertices
 
-  var points = [
-    [-0.5, 0.5],
-    [-0.5, -0.5],
-    [0.5, -0.5],
-    [0.5, 0.5]
-  ]
-  var lines = createLines(points)
-
   var vertexBufferObject = gl.createBuffer()
+  var box = new BoxOutline(0, 0.5)
+  updateBufferData(gl, box.vertices, vertexBufferObject)
 
-  updateBufferData(gl, lines, vertexBufferObject)
+
+
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
   var positionAttributeLocation = gl.getAttribLocation(program, 'vertexPosition')
@@ -184,18 +180,12 @@ var initDemo = function() {
   //Note this uses whatever active buffer we have at the moment.
 
 
-
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
 
-    var rotatedPoints = points.map((point) => {
-      return rotate2d(point, angle)
-    })
 
-    var newLines = createLines(rotatedPoints)
-
-    updateBufferData(gl, newLines, vertexBufferObject)
+    updateBufferData(gl, box.vertices, vertexBufferObject)
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
