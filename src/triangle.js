@@ -257,6 +257,8 @@ var initDemo = function() {
 
   //main render loop
   var identityMatrix = new Float32Array(16)
+  var xRotationMatrix = new Float32Array(16)
+  var yRotationMatrix = new Float32Array(16)
   mat4.identity(identityMatrix)
   var angle = 0
   var loop = function() {
@@ -264,7 +266,10 @@ var initDemo = function() {
     angle = performance.now() / 1000 / 6 * 2 * Math.PI
     //Rotate the identityMatrix by "angle" about the [0,1,0] - vertical axis,
     //and store the result in the worldMatrix mat4 matrix
-    mat4.rotate(worldMatrix, identityMatrix, angle, [0,1,0])
+    mat4.rotate(yRotationMatrix, identityMatrix, angle, [0,1,0])
+    mat4.rotate(xRotationMatrix, identityMatrix, angle *2, [1,0,0])
+    mat4.multiply(worldMatrix, yRotationMatrix, xRotationMatrix)
+
     gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix)
     gl.clearColor(0.75, 0.86, 0.8, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
