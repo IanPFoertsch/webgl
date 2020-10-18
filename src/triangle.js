@@ -52,6 +52,16 @@ var initDemo = function() {
 
   gl.clearColor(0.75, 0.86, 0.8, 1.0)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+  //DepthTest basically means only render surfaces which are closer to the camera than what we just rendered
+  //bascially don't waste computation on faces which aren't visible
+  // gl.enable(gl.DEPTH_TEST)
+  // CULL_FACE basically drops the back face
+  gl.enable(gl.CULL_FACE)
+  //frontface - A face is formed by the order of the vertices appearing:
+  //CCW - counterclockwise to each other
+  // CW - clockwise to each other
+  gl.frontFace(gl.CCW)
+  gl.cullFace(gl.BACK)
 
   //get WebGl ready to use shaders
   //create a shader using WebGL api
@@ -97,18 +107,83 @@ var initDemo = function() {
   //Normal RAM variable that we'll supply to the graphics card program
   //We need to supply this RAM into a graphics card buffer memory
   // Now we need to add color to our vertices
-  var triangleVertices = [
-    //x, y, y         R,   G,   B
-    0.0, 0.5, 0.0,    1.0, 1.0, 0.0,
-    -0.5, -0.5, 0.0,  0.7, 0.3, 1.0,
-    0.5, -0.5, 0.0,   0.0, 1.0, 1.0
-  ]
+  var boxVertices = [ // X, Y, Z           R, G, B
+		// Top
+		-1.0, 1.0, -1.0,   0.5, 0.5, 0.5,
+		-1.0, 1.0, 1.0,    0.5, 0.5, 0.5,
+		1.0, 1.0, 1.0,     0.5, 0.5, 0.5,
+		1.0, 1.0, -1.0,    0.5, 0.5, 0.5,
 
-  var triangleVertexBufferObject = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject)
+		// Left
+		-1.0, 1.0, 1.0,    0.75, 0.25, 0.5,
+		-1.0, -1.0, 1.0,   0.75, 0.25, 0.5,
+		-1.0, -1.0, -1.0,  0.75, 0.25, 0.5,
+		-1.0, 1.0, -1.0,   0.75, 0.25, 0.5,
+
+		// Right
+		1.0, 1.0, 1.0,    0.25, 0.25, 0.75,
+		1.0, -1.0, 1.0,   0.25, 0.25, 0.75,
+		1.0, -1.0, -1.0,  0.25, 0.25, 0.75,
+		1.0, 1.0, -1.0,   0.25, 0.25, 0.75,
+
+		// Front
+		1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
+		1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
+		-1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
+		-1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
+
+		// Back
+		1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
+		1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
+		-1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
+		-1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
+
+		// Bottom
+		-1.0, -1.0, -1.0,   0.5, 0.5, 1.0,
+		-1.0, -1.0, 1.0,    0.5, 0.5, 1.0,
+		1.0, -1.0, 1.0,     0.5, 0.5, 1.0,
+		1.0, -1.0, -1.0,    0.5, 0.5, 1.0,
+	];
+
+  //boxIndices - indicate which indices form triangles
+  var boxIndices =
+	[
+		// Top triangles are
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23
+	];
+
+
+
+  var boxVertexBufferObject = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, boxVertexBufferObject)
   //Note: Javascript numbers are always 64 bit float precision numbers, so we need to converte
   //to 32 bit floats
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW)
+
+  var boxIndexBufferObject = gl.createBuffer()
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject)
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW)
 
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
@@ -165,7 +240,7 @@ var initDemo = function() {
   // eye: position of viewer in 3d space
   // center: position viewer is looking at
   // up: which direction is up?
-  mat4.lookAt(viewMatrix, [0,0,-5], [0,0,0], [0,1,0])
+  mat4.lookAt(viewMatrix, [0,0,-6], [0,0,0], [0,1,0])
   //arguments: Output, field of view, aspect ratio, near plane, far plane
   // output: array to write results to:
   // field of view: vertical field of view in radians
@@ -193,14 +268,17 @@ var initDemo = function() {
     gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix)
     gl.clearColor(0.75, 0.86, 0.8, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+    //Note this uses whatever active buffer we have at the moment.
+    //gl.drawElements takes 4 params:
+    //1: Type of thing we want to draw: usually triangles
+    //2: the number of things we want to draw: we can just make this the number of box indices we have
+    //3: data type of values in the element array buffer -> in our case this is our indices
+    //4: where in elements buffer to start: in our case just start at the beginning
+    gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0)
     requestAnimationFrame(loop);
   }
-  //Note this uses whatever active buffer we have at the moment.
-  //gl.drawArrays takes 3 params:
-  //1: Type of thing we want to draw: usually triangles
-  //2: number of vertexes we want to skip
-  //3: number of vertexes we want to draw
+
   requestAnimationFrame(loop)
 
 }
