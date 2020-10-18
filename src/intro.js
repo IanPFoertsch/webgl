@@ -27,6 +27,7 @@ var fragmentShaderText = `
 `
 
 var angle = 0
+var translation = [0,0]
 window.addEventListener("keydown", function(event) {
   if (event.defaultPrevented) {
     return; // Do nothing if the event was already processed
@@ -34,10 +35,23 @@ window.addEventListener("keydown", function(event) {
 
   switch (event.key) {
     case "ArrowDown":
-      angle -= 1
+      translation[1] -= 0.01
       break;
     case "ArrowUp":
+      translation[1] += 0.01
+      break;
+    case "ArrowRight":
+      translation[0] += 0.01
+      break;
+    case "ArrowLeft":
+      translation[0] -= 0.01
+      break;
+    case "PageDown":
       angle += 1
+      console.log("pressing pagedown!")
+      break;
+    case "PageUp":
+      angle -= 1
       break;
     default:
       return; // Quit when this doesn't handle the key event.
@@ -133,7 +147,7 @@ var initDemo = function() {
   // Now we need to add color to our vertices
 
   var vertexBufferObject = gl.createBuffer()
-  var box = new BoxOutline(0, 0.5)
+  var box = new BoxOutline([0,0], 0.5)
   updateBufferData(gl, box.vertices, vertexBufferObject)
 
 
@@ -176,17 +190,15 @@ var initDemo = function() {
   gl.enableVertexAttribArray(positionAttributeLocation)
   gl.enableVertexAttribArray(colorAttributeLocation)
   gl.useProgram(program)
-
+  console.log(box.vertices)
   //Note this uses whatever active buffer we have at the moment.
 
 
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
-
-
+    box.updatePosition(angle, translation)
     updateBufferData(gl, box.vertices, vertexBufferObject)
-
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.drawArrays(gl.LINES, 0, 8)

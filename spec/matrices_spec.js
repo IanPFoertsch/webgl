@@ -1,6 +1,6 @@
 "use strict"
 
-import { rotate2d, convertToRadians } from "../src/matrices.js"
+import { rotate2d, translate } from "../src/matrices.js"
 
 
 beforeEach(function() {

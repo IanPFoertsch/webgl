@@ -16,5 +16,12 @@ var rotate2d = function(vector2d, theta) {
   ]
 }
 
+//pretty sure this is commutative so order doesn't matter
+var translate = function(originVector, translateVector) {
+  return originVector.map((originItem, index) => {
+    return originItem + translateVector[index]
+  })
+}
 
-export { rotate2d, convertToRadians }
+
+export { rotate2d, translate }

@@ -36,14 +36,11 @@ beforeEach(function() {
 })
 
 describe("rotate2d", function() {
-  var box = new BoxOutline(0, 1)
+  var box = new BoxOutline([0,0], 1)
 
 
   fit("generates the expected Transformation", () => {
     console.log(box.vertices)
     console.log(box.vertices.length)
   })
-
-
-
 });
