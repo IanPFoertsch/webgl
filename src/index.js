@@ -1,5 +1,5 @@
 "use strict"
-import { initDemo } from './intro.js'
+import { initDemo } from './triangle.js'
 
 function setup() {
   initDemo()
