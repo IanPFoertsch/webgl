@@ -7,8 +7,9 @@
 var vertexShaderText = `
   precision mediump float;
   attribute vec2 vertexPosition;
+  attribute vec2 translation;
   void main() {
-    gl_Position = vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = vec4(vertexPosition + translation, 0.0, 1.0);
   }
 `
 //fl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) = fully non-transparent red
@@ -116,10 +117,8 @@ var initDemo = function() {
   // Now we need to add color to our vertices
 
   var vertexBufferObject = gl.createBuffer()
-  function randomPoint() {
-    return [(Math.random(2)*2)-1, (Math.random(2)*2)-1]
-  }
-  var point = new Array(10).fill(0).map(randomPoint).flat()
+
+  var point = [0.0, 0.0, 0.5, 0.5]
 
 
 
@@ -130,6 +129,9 @@ var initDemo = function() {
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
   var positionAttributeLocation = gl.getAttribLocation(program, 'vertexPosition')
+  var translationAttributeLocation = gl.getAttribLocation(program, "translation")
+
+  console.log(translationAttributeLocation)
 
   //positionAttributeLocation is going to be some number
 
@@ -139,7 +141,7 @@ var initDemo = function() {
   // 2: number of elements per attribute (remember this matches to "attribute vec2 vertexPosition")
   // 3: The Type of the elements
   // 4: gl.FALSE - don't worry about this for now
-  // 5: size of an individual vertex in number of bytes
+  // 5: "Stride" - move forward size * sizeof(type) each iteration to get the next position
   // 6: offset from the beginning of a single vertex to this attribute
 
 
@@ -149,21 +151,21 @@ var initDemo = function() {
     2, //number of elements per attribute
     gl.FLOAT, //Type of elements
     gl.FALSE,
-    0, // size of an individual vertex in bytes (5 * (number of bytes per float)
+    0,
     0 // offset from the beginning of a single vertex to this attribute
   )
 
-  // gl.vertexAttribPointer(
-  //   colorAttributeLocation, //attribute location
-  //   3, //number of elements per attribute
-  //   gl.FLOAT, //Type of elements
-  //   gl.FALSE,
-  //   5 * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex in bytes (5 * (number of bytes per float)
-  //   2 * Float32Array.BYTES_PER_ELEMENT // offset from the bigining of a single vertex to this attribute
-  // )
+  gl.vertexAttribPointer(
+    translationAttributeLocation, //attribute location
+    2, //number of elements per attribute
+    gl.FLOAT, //Type of elements
+    gl.FALSE,
+    0,
+    2 * Float32Array.BYTES_PER_ELEMENT // offset from the bigining of a single vertex to this attribute
+  )
 
   gl.enableVertexAttribArray(positionAttributeLocation)
-
+  gl.enableVertexAttribArray(translationAttributeLocation)
   gl.useProgram(program)
 
   //Note this uses whatever active buffer we have at the moment.
@@ -172,11 +174,13 @@ var initDemo = function() {
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
+    point[2] = translation[0]
+    point[3] = translation[1]
 
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.drawArrays(gl.POINTS, 0, 10)
+    gl.drawArrays(gl.POINTS, 0, 1)
 
     requestAnimationFrame(loop)
   }
