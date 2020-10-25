@@ -116,8 +116,13 @@ var initDemo = function() {
   // Now we need to add color to our vertices
 
   var vertexBufferObject = gl.createBuffer()
+  function randomPoint() {
+    return [(Math.random(2)*2)-1, (Math.random(2)*2)-1]
+  }
+  var point = new Array(10).fill(0).map(randomPoint).flat()
 
-  var point = [0.0, 0.0]
+
+
   updateBufferData(gl, point, vertexBufferObject)
 
 
@@ -171,7 +176,7 @@ var initDemo = function() {
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.drawArrays(gl.POINTS, 0, 1)
+    gl.drawArrays(gl.POINTS, 0, 10)
 
     requestAnimationFrame(loop)
   }
