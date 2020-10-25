@@ -7,9 +7,9 @@
 var vertexShaderText = `
   precision mediump float;
   attribute vec2 vertexPosition;
-  attribute vec2 translation;
+
   void main() {
-    gl_Position = vec4(vertexPosition + translation, 0.0, 1.0);
+    gl_Position = vec4(vertexPosition, 0.0, 1.0);
   }
 `
 //fl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) = fully non-transparent red
@@ -19,41 +19,6 @@ var fragmentShaderText = `
     gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
   }
 `
-
-var angle = 0
-var translation = [0,0]
-window.addEventListener("keydown", function(event) {
-  if (event.defaultPrevented) {
-    return; // Do nothing if the event was already processed
-  }
-
-  switch (event.key) {
-    case "ArrowDown":
-      translation[1] -= 0.01
-      break;
-    case "ArrowUp":
-      translation[1] += 0.01
-      break;
-    case "ArrowRight":
-      translation[0] += 0.01
-      break;
-    case "ArrowLeft":
-      translation[0] -= 0.01
-      break;
-    case "PageDown":
-      angle += 1
-      console.log("pressing pagedown!")
-      break;
-    case "PageUp":
-      angle -= 1
-      break;
-    default:
-      return; // Quit when this doesn't handle the key event.
-  }
-
-  // Cancel the default action to avoid it being handled twice
-  event.preventDefault();
-}, true)
 
 function updateBufferData(canvasContext, vertices, buffer) {
   canvasContext.bindBuffer(
@@ -99,7 +64,6 @@ function createShader(gl, type, source) {
 }
 
 var initDemo = function() {
-
   var canvas = document.getElementById('glCanvas');
   const gl = canvas.getContext("webgl");
 
@@ -120,8 +84,6 @@ var initDemo = function() {
 
   var point = [0.0, 0.0, 0.5, 0.5]
 
-
-
   updateBufferData(gl, point, vertexBufferObject)
 
 
@@ -129,9 +91,9 @@ var initDemo = function() {
   //so now we've provided the shader with vertex information, but we need to inform it how to handle it.
   //Get the attribute location of the 'vertexPosition' attribute from the program
   var positionAttributeLocation = gl.getAttribLocation(program, 'vertexPosition')
-  var translationAttributeLocation = gl.getAttribLocation(program, "translation")
+  // var translationAttributeLocation = gl.getAttribLocation(program, "translation")
 
-  console.log(translationAttributeLocation)
+  // console.log(translationAttributeLocation)
 
   //positionAttributeLocation is going to be some number
 
@@ -151,21 +113,21 @@ var initDemo = function() {
     2, //number of elements per attribute
     gl.FLOAT, //Type of elements
     gl.FALSE,
-    0,
+    2 * Float32Array.BYTES_PER_ELEMENT,
     0 // offset from the beginning of a single vertex to this attribute
   )
 
-  gl.vertexAttribPointer(
-    translationAttributeLocation, //attribute location
-    2, //number of elements per attribute
-    gl.FLOAT, //Type of elements
-    gl.FALSE,
-    0,
-    2 * Float32Array.BYTES_PER_ELEMENT // offset from the bigining of a single vertex to this attribute
-  )
+  // gl.vertexAttribPointer(
+  //   translationAttributeLocation, //attribute location
+  //   2, //number of elements per attribute
+  //   gl.FLOAT, //Type of elements
+  //   gl.FALSE,
+  //   0,
+  //   2 * Float32Array.BYTES_PER_ELEMENT // offset from the bigining of a single vertex to this attribute
+  // )
 
   gl.enableVertexAttribArray(positionAttributeLocation)
-  gl.enableVertexAttribArray(translationAttributeLocation)
+  // gl.enableVertexAttribArray(translationAttributeLocation)
   gl.useProgram(program)
 
   //Note this uses whatever active buffer we have at the moment.
@@ -174,13 +136,14 @@ var initDemo = function() {
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
-    point[2] = translation[0]
-    point[3] = translation[1]
-
+    // point[2] = translation[0]
+    // point[3] = translation[1]
+    console.log(point)
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.drawArrays(gl.POINTS, 0, 1)
+    //NOTE: Lines need at least 2 points you jabranus
+    gl.drawArrays(gl.LINES, 0, 2)
 
     requestAnimationFrame(loop)
   }
