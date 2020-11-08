@@ -7,9 +7,10 @@
 var vertexShaderText = `
   precision mediump float;
   attribute vec2 vertexPosition;
+  uniform vec2 u_translation;
 
   void main() {
-    gl_Position = vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = vec4(vertexPosition + u_translation, 0.0, 1.0);
   }
 `
 //fl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) = fully non-transparent red
@@ -63,8 +64,12 @@ function createShader(gl, type, source) {
   }
 }
 
-var initDemo = function() {
+
+
+var initDemo = function(state) {
+
   var canvas = document.getElementById('glCanvas');
+
   const gl = canvas.getContext("webgl");
 
   //get WebGl ready to use shaders
@@ -132,13 +137,15 @@ var initDemo = function() {
 
   //Note this uses whatever active buffer we have at the moment.
 
-
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
     // point[2] = translation[0]
     // point[3] = translation[1]
-    console.log(point)
+
+    var translationLocation = gl.getUniformLocation(program, "u_translation")
+
+    gl.uniform2fv(translationLocation, state.translation)
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
