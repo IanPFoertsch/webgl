@@ -87,7 +87,7 @@ var initDemo = function(state) {
 
   var vertexBufferObject = gl.createBuffer()
 
-  var point = [0.0, 0.0, 0.5, 0.5]
+  var point = [-0.25, -0.25, 0.25, 0.25]
 
   updateBufferData(gl, point, vertexBufferObject)
 

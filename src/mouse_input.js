@@ -2,13 +2,18 @@
 
 
 class MouseHandler {
-  constructor() {}
-
-  setState(state) {
+  constructor(state, canvas) {
     this.state = state
-  }
-  setCanvas(canvas) {
     this.canvas = canvas
+    this.registerDefaultHandlers()
+  }
+
+  registerDefaultHandlers() {
+    //NOTE: There must be a better way to do this: binding the handler's mousedown function
+    // directly wipes away references to "this", meaning we can't update the state,
+    // so we wrap it in an intermediate anonymouse function
+    this.canvas.onmousedown = (event) => {this.mouseDown(event)}
+    this.canvas.onmouseup = (event) => {this.mouseUp(event)}
   }
 
   mouseMove(event) {
@@ -24,7 +29,6 @@ class MouseHandler {
 
   mouseDown(event) {
     this.state.origin = [event.clientX, event.clientY]
-    console.log(event)
     this.canvas.onmousemove = (moveEvent) => {this.mouseMove(moveEvent)}
   }
 
@@ -38,24 +42,10 @@ class MouseHandler {
   }
 }
 
-const handler = new MouseHandler()
 
 function initMouseHandlers(state) {
-
   var canvas = document.getElementById('glCanvas');
-  handler.setState(state)
-  handler.setCanvas(canvas)
-
-  console.log(handler)
-  // var canvasDimensions = canvas
-  console.log(canvas.onmousemove)
-  //NOTE: There must be a better way to do this: binding the handler's mousedown function
-  // directly wipes away references to "this", meaning we can't update the state,
-  // so we wrap it in an intermediate anonymouse function
-  canvas.onmousedown = (event) => {handler.mouseDown(event)}
-  // canvas.onmousemove = mouseListener
-  canvas.onmouseup = (event) => {handler.mouseUp(event)}
-
+  const handler = new MouseHandler(state, canvas)
 }
 
 export { initMouseHandlers }
