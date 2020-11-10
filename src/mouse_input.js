@@ -1,22 +1,48 @@
 "use strict"
 
+var handleKeyboardInput = function(state, event) {
+  console.log(event)
+  if (event.key === "Control") {
+    console.log(event)
+    // state.inputState["Control"] = true
+    // this.canvas.onmousedown = (event) => {
+    //   this.state.origin = [event.clientX, event.clientY]
+    //   this.canvas.onmousemove = (event) => {
+    //       var normalizedRotation = (event.clientX - this.state.origin[0]) / this.canvas.width
+    //       this.state.rotation = normalizedRotation
+    //   }
+    // }
 
-class MouseHandler {
+    // this.canvas.onmouseup = (event) => {
+      // state.inputState["Control"] = false
+      //need to de-register existing onmousemove handler, re-register defaults
+      // this.canvas.onmousemove = null
+      //but also save the existing translation
+      // this.rotationHandler(event)
+    // }
+  }
+}
+
+class MouseDownEventHandler {
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
-    this.registerDefaultHandlers()
   }
 
-  registerDefaultHandlers() {
-    //NOTE: There must be a better way to do this: binding the handler's mousedown function
-    // directly wipes away references to "this", meaning we can't update the state,
-    // so we wrap it in an intermediate anonymouse function
-    this.canvas.onmousedown = (event) => {this.mouseDown(event)}
-    this.canvas.onmouseup = (event) => {this.mouseUp(event)}
+  handleEvent(event) {
+    this.state.origin = [event.clientX, event.clientY]
+  }
+}
+
+class TranslationController {
+  //TODO: I don't think we need access to the canvas
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
   }
 
-  mouseMove(event) {
+  handleEvent(event) {
+    console.log("handling", this.state)
     var normalizedX = (event.clientX - this.state.origin[0]) / this.canvas.width
     //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
     //rather than add it
@@ -26,11 +52,48 @@ class MouseHandler {
       normalizedX + this.state.existingTranslation[0],
       normalizedY + this.state.existingTranslation[1]]
   }
+}
 
-  mouseDown(event) {
-    this.state.origin = [event.clientX, event.clientY]
-    this.canvas.onmousemove = (moveEvent) => {this.mouseMove(moveEvent)}
+class InputHandler {
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+    this.stack = []
+    this.registerDefaultHandlers()
   }
+
+  registerDefaultHandlers() {
+    //NOTE: There must be a better way to do this: binding the handler's mousedown function
+    // directly wipes away references to "this", meaning we can't update the state,
+    // so we wrap it in an intermediate anonymouse function
+    //NOTE: replace this with document event listeners document.addEventListener("mousedown", event => {...})
+    this.canvas.onmousedown = (event) => {
+      new MouseDownEventHandler(this.state, this.canvas).handleEvent(event)
+      this.stack.push(new TranslationController(this.state, this.canvas))
+    }
+    this.canvas.onmouseup = (event) => {
+      this.stack.pop()
+      this.handleEvent(event)
+    }
+
+    // document.addEventListener("keydown", event => {
+    //   handleKeyboardInput(this.state, event)
+    // })
+    //
+    // document.addEventListener("keyup", event => {
+    //   // if (event.key === "Control") {
+    //   //   this.canvas.onmousedown = (event) => {this.mouseDown(event)}
+    //   // }
+    //   console.log("key up")
+    //   handleKeyboardInput(this.state, event)
+    // })
+  }
+
+  handleEvent(event) {
+    this.stack[this.stack.length - 1].handleEvent(event)
+  }
+
+
 
   mouseUp(event) {
     this.state.origin = null
@@ -45,7 +108,8 @@ class MouseHandler {
 
 function initMouseHandlers(state) {
   var canvas = document.getElementById('glCanvas');
-  const handler = new MouseHandler(state, canvas)
+  console.log('iniitializing', state)
+  const inputHandler = new InputHandler(state, canvas)
 }
 
 export { initMouseHandlers }

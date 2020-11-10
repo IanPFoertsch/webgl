@@ -8,6 +8,7 @@ var vertexShaderText = `
   precision mediump float;
   attribute vec2 vertexPosition;
   uniform vec2 u_translation;
+  uniform vec2 u_rotation;
 
   void main() {
     gl_Position = vec4(vertexPosition + u_translation, 0.0, 1.0);
@@ -144,7 +145,9 @@ var initDemo = function(state) {
     // point[3] = translation[1]
 
     var translationLocation = gl.getUniformLocation(program, "u_translation")
+    var rotationLocation = gl.getUniformLocation(program, "u_rotation")
 
+    gl.uniform1f(rotationLocation, state.rotation)
     gl.uniform2fv(translationLocation, state.translation)
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
