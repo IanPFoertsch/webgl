@@ -75,6 +75,11 @@ class InputHandler {
       this.stack.pop()
       this.handleEvent(event)
     }
+    this.canvas.onmousemove = (event) => {
+      this.handleEvent(event)
+    }
+
+
 
     // document.addEventListener("keydown", event => {
     //   handleKeyboardInput(this.state, event)
@@ -90,7 +95,11 @@ class InputHandler {
   }
 
   handleEvent(event) {
-    this.stack[this.stack.length - 1].handleEvent(event)
+    if (this.stack.length === 0) {
+      return
+    } else {
+      this.stack[this.stack.length - 1].handleEvent(event)
+    }
   }
 
 
