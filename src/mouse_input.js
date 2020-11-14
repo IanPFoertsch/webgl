@@ -34,23 +34,46 @@ class MouseDownEventHandler {
   }
 }
 
-class TranslationController {
+class MouseUpEventHandler {
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+  }
+
+  handleEvent() {
+    this.state.existingTranslation = [
+      this.state.translation[0],
+      this.state.translation[1]
+    ]
+  }
+}
+
+class ViewUpdate {
+  constructor() {
+    this.translation = [0.0,0.0]
+  }
+}
+
+class MouseMoveInputHandler {
   //TODO: I don't think we need access to the canvas
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
   }
 
-  handleEvent(event) {
-    console.log("handling", this.state)
+  handleEvent(event, update) {
+    //TODO: WE should be able to not store the mousedown origin on the actual state,
+    //but rather in something we add to the stack
     var normalizedX = (event.clientX - this.state.origin[0]) / this.canvas.width
     //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
     //rather than add it
     var normalizedY = (this.state.origin[1] - event.clientY) / this.canvas.height
 
-    this.state.translation = [
-      normalizedX + this.state.existingTranslation[0],
-      normalizedY + this.state.existingTranslation[1]]
+    update.translation = [
+      normalizedX,
+      normalizedY
+    ]
+    return update
   }
 }
 
@@ -58,7 +81,7 @@ class InputHandler {
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
-    this.stack = []
+    this.queue = []
     this.registerDefaultHandlers()
   }
 
@@ -68,56 +91,65 @@ class InputHandler {
     // so we wrap it in an intermediate anonymouse function
     //NOTE: replace this with document event listeners document.addEventListener("mousedown", event => {...})
     this.canvas.onmousedown = (event) => {
-      new MouseDownEventHandler(this.state, this.canvas).handleEvent(event)
-      this.stack.push(new TranslationController(this.state, this.canvas))
+      this.handleEvent(event)
     }
     this.canvas.onmouseup = (event) => {
-      this.stack.pop()
       this.handleEvent(event)
     }
+    document.addEventListener("keydown", event => {
+      this.handleEvent(event)
+    })
+    document.addEventListener("keyup", event => {
+      this.handleEvent(event)
+    })
+
     this.canvas.onmousemove = (event) => {
-      this.handleEvent(event)
+      var update = this.handleMouseMoveInput(event)
+      this.stateUpdate(update)
     }
+  }
 
-
-
-    // document.addEventListener("keydown", event => {
-    //   handleKeyboardInput(this.state, event)
-    // })
-    //
-    // document.addEventListener("keyup", event => {
-    //   // if (event.key === "Control") {
-    //   //   this.canvas.onmousedown = (event) => {this.mouseDown(event)}
-    //   // }
-    //   console.log("key up")
-    //   handleKeyboardInput(this.state, event)
-    // })
+  handleMouseMoveInput(event) {
+    var stateUpdate = this.queue.reduce((oldUpdate, handler) => {
+      var newUpdate = handler.handleEvent(event, oldUpdate)
+      return newUpdate
+    }, new ViewUpdate())
+    return stateUpdate
   }
 
   handleEvent(event) {
-    if (this.stack.length === 0) {
-      return
-    } else {
-      this.stack[this.stack.length - 1].handleEvent(event)
+    switch(event.type) {
+      case "mousedown":
+        new MouseDownEventHandler(this.state, this.canvas).handleEvent(event)
+        this.queue.push(new MouseMoveInputHandler(this.state, this.canvas))
+        break
+      case "mouseup":
+        new MouseUpEventHandler(this.state, this.canvas).handleEvent(event)
+        this.queue = []
+        break
+      case "mousemove":
+        break
+      case "keydown":
+        console.log("keydown!")
+        break
+      case "keyup":
+        console.log("keyup!")
+        break
+      default:
+
+        break
     }
   }
 
-
-
-  mouseUp(event) {
-    this.state.origin = null
-    this.canvas.onmousemove = null
-    this.state.existingTranslation = [
-      this.state.translation[0],
-      this.state.translation[1]
-    ]
+  stateUpdate(update) {
+    this.state.translation[0] = update.translation[0] + this.state.existingTranslation[0]
+    this.state.translation[1] = update.translation[1] + this.state.existingTranslation[1]
   }
 }
 
 
 function initMouseHandlers(state) {
   var canvas = document.getElementById('glCanvas');
-  console.log('iniitializing', state)
   const inputHandler = new InputHandler(state, canvas)
 }
 
