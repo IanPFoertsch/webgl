@@ -1,28 +1,5 @@
 "use strict"
 
-var handleKeyboardInput = function(state, event) {
-  console.log(event)
-  if (event.key === "Control") {
-    console.log(event)
-    // state.inputState["Control"] = true
-    // this.canvas.onmousedown = (event) => {
-    //   this.state.origin = [event.clientX, event.clientY]
-    //   this.canvas.onmousemove = (event) => {
-    //       var normalizedRotation = (event.clientX - this.state.origin[0]) / this.canvas.width
-    //       this.state.rotation = normalizedRotation
-    //   }
-    // }
-
-    // this.canvas.onmouseup = (event) => {
-      // state.inputState["Control"] = false
-      //need to de-register existing onmousemove handler, re-register defaults
-      // this.canvas.onmousemove = null
-      //but also save the existing translation
-      // this.rotationHandler(event)
-    // }
-  }
-}
-
 class MouseDownEventHandler {
   constructor(state, canvas) {
     this.state = state
@@ -51,11 +28,17 @@ class MouseUpEventHandler {
 class ViewUpdate {
   constructor() {
     this.translation = [0.0,0.0]
+    this.rotation = 0.0
   }
+  // get translation() {
+  //   return this.translation
+  // }
+  // set translation(newTranslation) {
+  //   this.translation = newTranslation
+  // }
 }
 
 class MouseMoveInputHandler {
-  //TODO: I don't think we need access to the canvas
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
@@ -77,11 +60,27 @@ class MouseMoveInputHandler {
   }
 }
 
+class ControlDownInputHandler {
+  //ControlDown accepts an existing update and transforms it to rotational update
+  // data
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+  }
+
+  handleEvent(event, update) {
+    update.rotation = update.translation[0]
+    update.translation[0] = 0.0
+    update.translation[1] = 0.0
+    return update
+  }
+}
+
 class InputHandler {
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
-    this.queue = []
+    this.stack = []
     this.registerDefaultHandlers()
   }
 
@@ -110,33 +109,47 @@ class InputHandler {
   }
 
   handleMouseMoveInput(event) {
-    var stateUpdate = this.queue.reduce((oldUpdate, handler) => {
+    var stateUpdate = this.stack.reduce((oldUpdate, handler) => {
       var newUpdate = handler.handleEvent(event, oldUpdate)
       return newUpdate
     }, new ViewUpdate())
+
     return stateUpdate
+  }
+
+  handleKeyDownInput(event) {
+    switch(event.key) {
+      case "Control":
+        if (this.stack.length === 0) {
+          this.stack.unshift(new ControlDownInputHandler())
+        }
+        // Otherwise Don't add a handler to the stack
+        // because another handler is already active
+        break
+      default:
+        break
+    }
   }
 
   handleEvent(event) {
     switch(event.type) {
       case "mousedown":
         new MouseDownEventHandler(this.state, this.canvas).handleEvent(event)
-        this.queue.push(new MouseMoveInputHandler(this.state, this.canvas))
+        this.stack.unshift(new MouseMoveInputHandler(this.state, this.canvas))
         break
       case "mouseup":
         new MouseUpEventHandler(this.state, this.canvas).handleEvent(event)
-        this.queue = []
+        this.stack = []
         break
       case "mousemove":
         break
       case "keydown":
-        console.log("keydown!")
+        this.handleKeyDownInput(event)
         break
       case "keyup":
-        console.log("keyup!")
+
         break
       default:
-
         break
     }
   }
