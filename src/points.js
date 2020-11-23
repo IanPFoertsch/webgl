@@ -11,7 +11,14 @@ var vertexShaderText = `
   uniform vec2 u_rotation;
 
   void main() {
-    gl_Position = vec4(vertexPosition + u_translation, 0.0, 1.0);
+    mat4 translation = mat4(
+      1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1
+    );
+    vec4 extendedPosition = vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = translation * extendedPosition;
   }
 `
 //fl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) = fully non-transparent red
