@@ -10,7 +10,7 @@
 
 
   "helpers": [
-    "helpers/**/*.js"
+    "spec/helpers/array_helper.js"
   ],
 
 

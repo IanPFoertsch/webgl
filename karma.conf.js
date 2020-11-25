@@ -13,6 +13,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
      // all files ending in "_spec"
+     { pattern: 'spec/spec_helper.js', watched: false },
      { pattern: 'spec/*_spec.js', watched: false },
      { pattern: 'spec/**/*_spec.js', watched: false },
      // each file acts as entry point for the webpack configuration
