@@ -4,13 +4,16 @@
 // gl_Position = vec4(vertexPosition, 0.0, 1.0) -> gives position of as a 4-vector
 // vertexPosition already has 2 elements, so combine those 2 existing elements with
 // 0.0, and 1.0
+import { multiply4, rotationMatrix, translationMatrix } from "../src/matrices.js"
+
 var vertexShaderText = `
   precision mediump float;
   attribute vec2 vertexPosition;
-  uniform vec2 u_translation;
+  uniform mat4 matrix;
 
   void main() {
-    gl_Position = vec4(vertexPosition + u_translation, 0.0, 1.0);
+    vec4 extendedPosition = vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = matrix * extendedPosition;
   }
 `
 //fl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) = fully non-transparent red
@@ -140,12 +143,17 @@ var initDemo = function(state) {
   var loop = function() {
     //note: not a good idea to create variables inside loop due to memory
     //allocation concerns
-    // point[2] = translation[0]
-    // point[3] = translation[1]
 
-    var translationLocation = gl.getUniformLocation(program, "u_translation")
+    var matrixLocation = gl.getUniformLocation(program, "matrix")
+    var translation = translationMatrix(state.translation[0], state.translation[1])
 
-    gl.uniform2fv(translationLocation, state.translation)
+    var rotation = rotationMatrix(state.rotation)
+    var matrix = multiply4(translation, rotation)
+    // console.log(state.rotation)
+
+
+    // console.log(matrix)
+    gl.uniformMatrix4fv(matrixLocation, false, matrix)
     updateBufferData(gl, point, vertexBufferObject)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

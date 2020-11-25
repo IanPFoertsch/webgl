@@ -1,11 +1,9 @@
 "use strict"
 import { initDemo } from './points.js'
 import { initMouseHandlers } from './mouse_input.js'
+import { State } from './state.js'
 function setup() {
-  var state = {
-    translation: [0.0, 0.0],
-    existingTranslation: [0.0, 0,0]
-  }
+  var state =  new State()
   initDemo(state)
   initMouseHandlers(state)
 }
