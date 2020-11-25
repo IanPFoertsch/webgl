@@ -113,7 +113,6 @@ class InputHandler {
       var newUpdate = handler.handleEvent(event, oldUpdate)
       return newUpdate
     }, new ViewUpdate())
-
     return stateUpdate
   }
 
@@ -122,6 +121,21 @@ class InputHandler {
       case "Control":
         if (this.stack.length === 0) {
           this.stack.unshift(new ControlDownInputHandler())
+        }
+        // Otherwise Don't add a handler to the stack
+        // because another handler is already active
+        break
+      default:
+        break
+    }
+  }
+
+  handleKeyUpInput(event) {
+    switch(event.key) {
+      case "Control":
+        if (this.stack[this.stack.length - 1] instanceof ControlDownInputHandler) {
+          //if the top of the stack is a ControlDownInputHandler
+          this.stack.pop()
         }
         // Otherwise Don't add a handler to the stack
         // because another handler is already active
@@ -147,7 +161,7 @@ class InputHandler {
         this.handleKeyDownInput(event)
         break
       case "keyup":
-
+        this.handleKeyUpInput(event)
         break
       default:
         break
@@ -157,6 +171,7 @@ class InputHandler {
   stateUpdate(update) {
     this.state.translation[0] = update.translation[0] + this.state.existingTranslation[0]
     this.state.translation[1] = update.translation[1] + this.state.existingTranslation[1]
+    this.state.rotation = update.rotation * 2
   }
 }
 
