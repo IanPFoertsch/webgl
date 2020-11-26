@@ -18,18 +18,16 @@ class Tree {
   vertices() {
     //todo: figure out a better way to do this
     var _vertices = this.origin.concat(this.terminus)
-    var left_vertices = []
-    var right_vertices = []
 
     if (this.left_child !== undefined) {
-      left_vertices = this.left_child.vertices()
+      _vertices.push(this.left_child.vertices())
     }
 
     if (this.right_child !== undefined) {
-      right_vertices = this.left_child.vertices()
+      _vertices.push(this.right_child.vertices())
     }
 
-    return [..._vertices, ...left_vertices, ...right_vertices]
+    return _vertices.flat()
   }
 }
 
