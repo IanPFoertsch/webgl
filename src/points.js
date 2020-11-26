@@ -6,7 +6,6 @@
 // 0.0, and 1.0
 import { multiply4, rotationMatrix, translationMatrix } from "../src/matrices.js"
 import { Line } from "./line.js"
-import { Box } from "./box.js"
 import { Tree } from "./tree.js"
 
 
@@ -15,7 +14,7 @@ var initDemo = function(state) {
   var canvas = document.getElementById('glCanvas');
   const gl = canvas.getContext("webgl");
 
-  var tree = new Tree({origin: [0.0,-0.5], length: 0.5, angle: 1.57, propagate:6, vary_by: 0.4})
+  var tree = new Tree({origin: [0.0,-0.5], length: 0.5, angle: 1.57, propagate:6, angle_variance: 0.4, length_decay: 1.7})
   var vertices = tree.vertices()
   var lines = []
   for (var i = 0; i < vertices.length; i += 4 ) {
