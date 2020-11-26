@@ -57,6 +57,18 @@ describe("Tree", function() {
           expect(tree.right_child.terminus).toVectorEqual([1,-1])
         })
       })
+
+      describe("length", () => {
+        fit("the child element's lengths decrease", () => {
+          // 1° × π/180 = radians
+          // 90deg & pi/180
+          var length = 1
+          var tree = new Tree({origin: [0,0], length: length, angle: 0.0, propagate: 1, vary_by: (90 * (Math.PI / 180)) })
+
+          expect(tree.left_child.length).toEqual(length / 2)
+          expect(tree.right_child.length).toEqual(length / 2)
+        })
+      })
     })
   })
 

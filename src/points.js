@@ -7,7 +7,7 @@
 import { multiply4, rotationMatrix, translationMatrix } from "../src/matrices.js"
 import { Line } from "./line.js"
 import { Box } from "./box.js"
-import { Triangle } from "./triangle.js"
+import { Tree } from "./tree.js"
 
 
 var initDemo = function(state) {
@@ -15,8 +15,13 @@ var initDemo = function(state) {
   var canvas = document.getElementById('glCanvas');
   const gl = canvas.getContext("webgl");
 
-  var box = new Box([], canvas, gl)
-  var triangle = new Triangle([], canvas, gl)
+  var tree = new Tree({origin: [0.0,-0.5], length: 0.5, angle: 1.57, propagate:6, vary_by: 0.4})
+  var vertices = tree.vertices()
+  var lines = []
+  for (var i = 0; i < vertices.length; i += 4 ) {
+    lines.push(new Line(vertices.slice(i, i + 4), canvas, gl))
+  }
+
 
   var loop = function() {
     //obtain the current state & generate a view update matrix from it
@@ -28,13 +33,9 @@ var initDemo = function(state) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     //NOTE: Lines need at least 2 points you jabranus\
-
-    // a_line.draw(matrix)
-    // b_line.draw(matrix)
-    // c_line.draw(matrix)
-    // d_line.draw(matrix)
-    // console.log(loop)
-    box.draw(matrix)
+    // line.draw(matrix)
+    lines.forEach((line) => { line.draw(matrix) })
+    // box.draw(matrix)
     requestAnimationFrame(loop)
   }
 
