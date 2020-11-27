@@ -11,14 +11,17 @@ class Cube {
     var c = [0.5, 0.5, 0.5]
     var d = [0.5, -0.5, 0.5]
 
-    var e = [-0.5, -0.5, -.5]
-    var f = [-0.5, 0.5, -.5]
-    var g = [0.5, 0.5, -.5]
-    var h = [0.5, -0.5, -.5]
+    var e = [-0.5, -0.5, -0.5]
+    var f = [-0.5, 0.5, -0.5]
+    var g = [0.5, 0.5, -0.5]
+    var h = [0.5, -0.5, -0.5]
 
-    // var red = [1,0,0,0]
-    // var green = [0,1,0,0]
-    // var blue = [0,0,1,0]
+    var red = [1,0,0,1]
+    var green = [0,1,0,1]
+    var blue = [0,0,1,1]
+    var pink = [1,0,1,1]
+    var cyan = [0,1,1,1]
+    var yellow = [1,1,0,1]
 
     this.wire_frame_vertices = [
       a, b,
@@ -38,45 +41,42 @@ class Cube {
       h, d
     ].flat()
 
-    // this.solid_vertices = [
-    //     -0.5,0.5,0.5,
-    //     0.0,0.5,0.0,
-    //     -0.25,0.25,0.0,
-    //  ]
 
      this.solid_vertices = [
-       a, b, c,
-       a, c, d,
-       e, a, d,
-       e, d, h
-     ].flat()
+       a, green, c, green, b, green, //front
+       a, green, d, green, c, green, //front
+       e, blue, g, blue, f, blue, //back
+       e, blue, h, blue, g, blue, //back
+       f, red, c, red, b, red, // top
+       f, red, c, red, g, red, // top
+       a, pink, h, pink, e, pink, // bottom
+       a, pink, d, pink, h, pink, // bottom
+       h, cyan, c, cyan, g, cyan, // right
+       h, cyan, d, cyan, c, cyan, // right
+       a, yellow, f, yellow, b, yellow, //left
+       a, yellow, e, yellow, f, yellow, // left
 
-     // var a = [-0.5, -0.5, 0.5]
-     // var b = [-0.5, 0.5, 0.5]
-     // var c = [0.5, 0.5, 0.5]
-     // //
-    //   // a, b, c,
-    //   // b, c, d,
-    //   //
-    //   a, e, d,
-    //   // e, h, d
-    // ].flat
+     ].flat()
 
     this.vertexShaderText = `
       precision mediump float;
       attribute vec3 vertexPosition;
       uniform mat4 matrix;
+      attribute vec4 inputColor;
+      varying vec4 vertexColor;
 
       void main() {
-        vec4 extendedPosition = vec4(vertexPosition, 1.0);
+        vec4 extendedPosition = vec4(vertexPosition, 1);
         gl_Position = matrix * extendedPosition;
+        vertexColor = inputColor;
       }
     `
 
     this.fragmentShaderText = `
       precision mediump float;
+      varying vec4 vertexColor;
       void main() {
-        gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+        gl_FragColor = vertexColor;
       }
     `
 
@@ -84,7 +84,9 @@ class Cube {
     this.fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.fragmentShaderText)
     this.program = this.createProgram(gl, this.vertexShader, this.fragmentShader)
     this.vertexBufferObject = gl.createBuffer()
+
     this.positionAttributeLocation = gl.getAttribLocation(this.program, 'vertexPosition')
+    this.colorAttributeLocation = gl.getAttribLocation(this.program, 'inputColor')
   }
 
   vertices() {
@@ -101,14 +103,28 @@ class Cube {
       3, //number of elements per attribute
       this.gl.FLOAT, //Type of elements
       this.gl.FALSE,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-      0 // offset from the beginning of a single vertex to this attribute
+      7 * Float32Array.BYTES_PER_ELEMENT, //stride: from the first peice of data, the positional info for the vertex is x elements
+      0 * Float32Array.BYTES_PER_ELEMENT  // offset from the beginning of a single vertex to this attribute
     )
+
+
+    this.gl.vertexAttribPointer(
+      this.colorAttributeLocation, //attribute location
+      4, //number of elements per attribute
+      this.gl.FLOAT, //Type of elements
+      this.gl.FALSE,
+      7 * Float32Array.BYTES_PER_ELEMENT, //stride: from the first peice of data, the positional info for the vertex is x elements
+      3 * Float32Array.BYTES_PER_ELEMENT // offset from the beginning of a single vertex to this attribute
+    )
+
     this.gl.enableVertexAttribArray(this.positionAttributeLocation)
+    this.gl.enableVertexAttribArray(this.colorAttributeLocation)
 
     var matrixLocation = this.gl.getUniformLocation(this.program, "matrix")
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix)
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, 12)
+    var num_vertices = this.vertices().length / 7
+
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, num_vertices)
   }
 
   updateBufferData(canvasContext, vertices, buffer) {

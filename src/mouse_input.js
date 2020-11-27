@@ -171,7 +171,7 @@ class InputHandler {
   stateUpdate(update) {
     this.state.translation[0] = update.translation[0] + this.state.existingTranslation[0]
     this.state.translation[1] = update.translation[1] + this.state.existingTranslation[1]
-    this.state.rotation = update.rotation * 2
+    this.state.rotation = update.rotation * 5
   }
 }
 

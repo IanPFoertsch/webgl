@@ -31,6 +31,7 @@ var initDemo = function(state) {
     //clear the current drawing & redraw our objects
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.enable(gl.DEPTH_TEST)
     //NOTE: Lines need at least 2 points you jabranus\
     cube.draw(matrix)
     // box.draw(matrix)
