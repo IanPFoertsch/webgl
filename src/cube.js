@@ -6,27 +6,41 @@ class Cube {
     // this.origin = origin
     this.canvas = canvas
     this.gl = gl
-    var a = [-0.5, -0.5, 0.5, 0]
-    var b = [-0.5, 0.5, 0.5, 0]
-    var c = [0.5, 0.5, 0.5, 0]
-    var d = [0.5, -0.5, 0.5, 0]
+    var a = [-0.5, -0.5, 0.5]
+    var b = [-0.5, 0.5, 0.5]
+    var c = [0.5, 0.5, 0.5]
+    var d = [0.5, -0.5, 0.5]
 
-    var e = [-0.5, -0.5, 0, 0]
-    var f = [-0.5, 0.5, 0, 0]
-    var g = [0.5, 0.5, 0, 0]
-    var h = [0.5, -0.5, 0, 0]
+    var e = [-0.5, -0.5, -.5]
+    var f = [-0.5, 0.5, -.5]
+    var g = [0.5, 0.5, -.5]
+    var h = [0.5, -0.5, -.5]
 
     this.vertices = [
-      
-    ]
+      a, b,
+      a, d,
+      a, e,
+
+      c, d,
+      c, g,
+      c, b,
+
+      f, e,
+      f, g,
+      f, b,
+
+      h, e,
+      h, g,
+      h, d
+    ].flat()
 
     this.vertexShaderText = `
       precision mediump float;
-      attribute vec2 vertexPosition;
+      attribute vec3 vertexPosition;
       uniform mat4 matrix;
 
       void main() {
-        vec4 extendedPosition = vec4(vertexPosition, 0.0, 1.0);
+        vec4 extendedPosition = vec4(vertexPosition, 1.0);
         gl_Position = matrix * extendedPosition;
       }
     `
@@ -34,7 +48,7 @@ class Cube {
     this.fragmentShaderText = `
       precision mediump float;
       void main() {
-        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
       }
     `
 
@@ -46,14 +60,15 @@ class Cube {
   }
 
   draw(matrix) {
+
     this.gl.useProgram(this.program)
     this.updateBufferData(this.gl, this.vertices, this.vertexBufferObject)
     this.gl.vertexAttribPointer(
       this.positionAttributeLocation, //attribute location
-      2, //number of elements per attribute
+      3, //number of elements per attribute
       this.gl.FLOAT, //Type of elements
       this.gl.FALSE,
-      2 * Float32Array.BYTES_PER_ELEMENT, //
+      3 * Float32Array.BYTES_PER_ELEMENT, //stride: offset in bytes between consecutive attributes
       0 // offset from the beginning of a single vertex to this attribute
     )
     this.gl.enableVertexAttribArray(this.positionAttributeLocation)
@@ -61,7 +76,7 @@ class Cube {
 
     var matrixLocation = this.gl.getUniformLocation(this.program, "matrix")
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix)
-    this.gl.drawArrays(this.gl.LINES, 0, 8)
+    this.gl.drawArrays(this.gl.LINES, 0, 24)
   }
 
   updateBufferData(canvasContext, vertices, buffer) {
