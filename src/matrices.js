@@ -26,7 +26,7 @@ var multiply4 = function(a, b) {
   return [c11, c12, c13, c14, c21, c22, c23, c24, c31, c32, c33, c34, c41, c42, c43, c44]
 }
 
-var rotationMatrix = function(radians) {
+var zRotation = function(radians) {
   var sin = Math.sin(radians)
   var cos = Math.cos(radians)
   return [
@@ -37,12 +37,36 @@ var rotationMatrix = function(radians) {
   ]
 }
 
-var translationMatrix = function(tx, ty) {
+var xRotation = function(angleInRadians) {
+  var cos = Math.cos(angleInRadians);
+  var sin = Math.sin(angleInRadians);
+
+  return [
+    1, 0, 0, 0,
+    0, cos, sin, 0,
+    0, -sin, cos, 0,
+    0, 0, 0, 1,
+  ];
+}
+
+var yRotation = function(angleInRadians) {
+  var cos = Math.cos(angleInRadians);
+  var sin = Math.sin(angleInRadians);
+
+  return [
+    cos, 0, -sin, 0,
+    0, 1, 0, 0,
+    sin, 0, cos, 0,
+    0, 0, 0, 1,
+  ];
+}
+
+var translationMatrix = function(tx, ty, tz) {
   return [
     1,  0,  0, 0,
     0,  1,  0, 0,
     0,  0,  1, 0,
-    tx, ty, 0, 1
+    tx, ty, tz, 1
   ]
 }
 
@@ -55,4 +79,4 @@ var identityMatrix = function() {
   ]
 }
 
-export { multiply4, rotationMatrix, translationMatrix }
+export { multiply4, zRotation, yRotation, xRotation, translationMatrix, identityMatrix }
