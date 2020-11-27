@@ -16,7 +16,11 @@ class Cube {
     var g = [0.5, 0.5, -.5]
     var h = [0.5, -0.5, -.5]
 
-    this.vertices = [
+    // var red = [1,0,0,0]
+    // var green = [0,1,0,0]
+    // var blue = [0,0,1,0]
+
+    this.wire_frame_vertices = [
       a, b,
       a, d,
       a, e,
@@ -33,6 +37,30 @@ class Cube {
       h, g,
       h, d
     ].flat()
+
+    // this.solid_vertices = [
+    //     -0.5,0.5,0.5,
+    //     0.0,0.5,0.0,
+    //     -0.25,0.25,0.0,
+    //  ]
+
+     this.solid_vertices = [
+       a, b, c,
+       a, c, d,
+       e, a, d,
+       e, d, h
+     ].flat()
+
+     // var a = [-0.5, -0.5, 0.5]
+     // var b = [-0.5, 0.5, 0.5]
+     // var c = [0.5, 0.5, 0.5]
+     // //
+    //   // a, b, c,
+    //   // b, c, d,
+    //   //
+    //   a, e, d,
+    //   // e, h, d
+    // ].flat
 
     this.vertexShaderText = `
       precision mediump float;
@@ -59,24 +87,28 @@ class Cube {
     this.positionAttributeLocation = gl.getAttribLocation(this.program, 'vertexPosition')
   }
 
-  draw(matrix) {
+  vertices() {
+    return this.solid_vertices
+  }
 
+  draw(matrix) {
     this.gl.useProgram(this.program)
-    this.updateBufferData(this.gl, this.vertices, this.vertexBufferObject)
+    // console.log(state)
+    this.updateBufferData(this.gl, this.vertices(), this.vertexBufferObject)
+
     this.gl.vertexAttribPointer(
       this.positionAttributeLocation, //attribute location
       3, //number of elements per attribute
       this.gl.FLOAT, //Type of elements
       this.gl.FALSE,
-      3 * Float32Array.BYTES_PER_ELEMENT, //stride: offset in bytes between consecutive attributes
+      3 * Float32Array.BYTES_PER_ELEMENT,
       0 // offset from the beginning of a single vertex to this attribute
     )
     this.gl.enableVertexAttribArray(this.positionAttributeLocation)
 
-
     var matrixLocation = this.gl.getUniformLocation(this.program, "matrix")
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix)
-    this.gl.drawArrays(this.gl.LINES, 0, 24)
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, 12)
   }
 
   updateBufferData(canvasContext, vertices, buffer) {
