@@ -1,16 +1,23 @@
 "use strict"
-class Box {
+class Cube {
   //should contain both the webgl representation & the CPU data
 
   constructor(vertices, canvas, gl) {
     // this.origin = origin
     this.canvas = canvas
     this.gl = gl
+    var a = [-0.5, -0.5, 0.5, 0]
+    var b = [-0.5, 0.5, 0.5, 0]
+    var c = [0.5, 0.5, 0.5, 0]
+    var d = [0.5, -0.5, 0.5, 0]
+
+    var e = [-0.5, -0.5, 0, 0]
+    var f = [-0.5, 0.5, 0, 0]
+    var g = [0.5, 0.5, 0, 0]
+    var h = [0.5, -0.5, 0, 0]
+
     this.vertices = [
-      -0.25, 0.25, 0.25, 0.25,
-      0.25, 0.25, 0.25, -0.25,
-      0.25, -0.25, -0.25, -0.25,
-      -0.25, -0.25, -0.25, 0.25
+      
     ]
 
     this.vertexShaderText = `
@@ -101,4 +108,4 @@ class Box {
 
 }
 
-export { Box }
+export { Cube }

@@ -4,7 +4,7 @@
 // gl_Position = vec4(vertexPosition, 0.0, 1.0) -> gives position of as a 4-vector
 // vertexPosition already has 2 elements, so combine those 2 existing elements with
 // 0.0, and 1.0
-import { multiply4, rotationMatrix, translationMatrix } from "../src/matrices.js"
+import { multiply4, zRotation, translationMatrix } from "../src/matrices.js"
 import { Line } from "./line.js"
 import { Tree } from "./tree.js"
 
@@ -21,11 +21,11 @@ var initDemo = function(state) {
     lines.push(new Line(vertices.slice(i, i + 4), canvas, gl))
   }
 
-
   var loop = function() {
+
     //obtain the current state & generate a view update matrix from it
-    var translation = translationMatrix(state.translation[0], state.translation[1])
-    var rotation = rotationMatrix(state.rotation)
+    var translation = translationMatrix(state.translation[0], state.translation[1], 0)
+    var rotation = zRotation(state.rotation)
     var matrix = multiply4(translation, rotation)
 
     //clear the current drawing & redraw our objects
