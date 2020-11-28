@@ -25,17 +25,79 @@ class MouseUpEventHandler {
   }
 }
 
-class ViewUpdate {
-  constructor() {
-    this.translation = [0.0,0.0]
-    this.rotation = 0.0
+class DefaultHandler {
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+    this.outputNode = null
   }
-  // get translation() {
-  //   return this.translation
-  // }
-  // set translation(newTranslation) {
-  //   this.translation = newTranslation
-  // }
+
+  handleEvent(event) {
+    if (this.outputNode === null) {
+      return new Update(event)
+    } else {
+      return this.outputNode.handleEvent(event)
+    }
+  }
+}
+
+class TranslationHandler {
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+    this.outputNode = null
+  }
+
+  handleEvent(update) {
+    if (this.outputNode === null) {
+      return new TranslationUpdate(event)
+    } else {
+      return this.outputNode.handleEvent(event)
+    }
+  }
+}
+
+class RotationHandler {
+  constructor(state, canvas) {
+    this.state = state
+    this.canvas = canvas
+    this.outputNode = null
+  }
+
+  handleEvent(update) {
+    if (this.outputNode === null) {
+      return new RotationUpdate (event)
+    } else {
+      return this.outputNode.handleEvent(event)
+    }
+  }
+}
+
+class TranslationUpdate {
+  constructor(event) {
+    this.x = event.clientX
+    this.y = event.clientY
+    this.translation = [event.clientX, event.clientY, 0.0]
+    this.rotation = [0.0, 0.0, 0.0]
+  }
+}
+
+class RotationUpdate {
+  constructor(event) {
+    this.x = event.clientX
+    this.y = event.clientY
+    this.translation = [0.0, 0.0, 0.0]
+    this.rotation = [event.clientX, event.clientY, 0.0]
+  }
+}
+
+class Update {
+  constructor(event) {
+    this.x = event.clientX
+    this.y = event.clientY
+    this.translation = [0.0, 0.0, 0.0]
+    this.rotation = [0.0, 0.0, 0.0]
+  }
 }
 
 class MouseMoveInputHandler {
@@ -80,7 +142,9 @@ class InputHandler {
   constructor(state, canvas) {
     this.state = state
     this.canvas = canvas
-    this.stack = []
+    this.defaultHandler = new DefaultHandler(state, canvas)
+    this.translationHandler = new TranslationHandler(state, canvas)
+    this.rotationHandler = new RotationHandler(state, canvas)
     this.registerDefaultHandlers()
   }
 
@@ -90,18 +154,18 @@ class InputHandler {
     // so we wrap it in an intermediate anonymouse function
     //NOTE: replace this with document event listeners document.addEventListener("mousedown", event => {...})
     this.canvas.onmousedown = (event) => {
-      this.handleEvent(event)
+      this.state.origin = [event.clientX, event.clientY, 0.0]
+      this.defaultHandler.outputNode = this.translationHandler
     }
     this.canvas.onmouseup = (event) => {
-      this.handleEvent(event)
+      this.defaultHandler.outputNode = null
     }
     document.addEventListener("keydown", event => {
-      this.handleEvent(event)
+      this.handleKeyDownInput(event)
     })
     document.addEventListener("keyup", event => {
-      this.handleEvent(event)
+      this.handleKeyUpInput(event)
     })
-
     this.canvas.onmousemove = (event) => {
       var update = this.handleMouseMoveInput(event)
       this.stateUpdate(update)
@@ -109,19 +173,20 @@ class InputHandler {
   }
 
   handleMouseMoveInput(event) {
-    var stateUpdate = this.stack.reduce((oldUpdate, handler) => {
-      var newUpdate = handler.handleEvent(event, oldUpdate)
-      return newUpdate
-    }, new ViewUpdate())
-    return stateUpdate
+
+    var update = this.defaultHandler.handleEvent(event)
+    // var stateUpdate = this.stack.reduce((oldUpdate, handler) => {
+    //   var newUpdate = handler.handleEvent(event, oldUpdate)
+    //   return newUpdate
+    // }, new Update())
+    // return stateUpdate
+    return update
   }
 
   handleKeyDownInput(event) {
     switch(event.key) {
       case "Control":
-        if (this.stack.length === 0) {
-          this.stack.unshift(new ControlDownInputHandler())
-        }
+        this.translationHandler.outputNode = this.rotationHandler
         // Otherwise Don't add a handler to the stack
         // because another handler is already active
         break
@@ -133,10 +198,7 @@ class InputHandler {
   handleKeyUpInput(event) {
     switch(event.key) {
       case "Control":
-        if (this.stack[this.stack.length - 1] instanceof ControlDownInputHandler) {
-          //if the top of the stack is a ControlDownInputHandler
-          this.stack.pop()
-        }
+        this.translationHandler.outputNode = null
         // Otherwise Don't add a handler to the stack
         // because another handler is already active
         break
@@ -145,33 +207,20 @@ class InputHandler {
     }
   }
 
-  handleEvent(event) {
-    switch(event.type) {
-      case "mousedown":
-        new MouseDownEventHandler(this.state, this.canvas).handleEvent(event)
-        this.stack.unshift(new MouseMoveInputHandler(this.state, this.canvas))
-        break
-      case "mouseup":
-        new MouseUpEventHandler(this.state, this.canvas).handleEvent(event)
-        this.stack = []
-        break
-      case "mousemove":
-        break
-      case "keydown":
-        this.handleKeyDownInput(event)
-        break
-      case "keyup":
-        this.handleKeyUpInput(event)
-        break
-      default:
-        break
-    }
-  }
-
   stateUpdate(update) {
-    this.state.translation[0] = update.translation[0] + this.state.existingTranslation[0]
-    this.state.translation[1] = update.translation[1] + this.state.existingTranslation[1]
-    this.state.rotation = update.rotation * 5
+
+    //TODO: WE should be able to not store the mousedown origin on the actual state,
+    //but rather in something we add to the stack
+
+    var normalizedX = (update.translation[0] - this.state.origin[0]) / this.canvas.width
+    //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
+    //rather than add it
+    var normalizedY = (this.state.origin[1] - update.translation[1]) / this.canvas.height
+
+    this.state.translation[0] = normalizedX + this.state.existingTranslation[0]
+    this.state.translation[1] = normalizedY + this.state.existingTranslation[1]
+
+    this.state.rotation[1] = update.rotation[1] / 10
   }
 }
 

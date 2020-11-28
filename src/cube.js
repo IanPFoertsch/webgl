@@ -95,7 +95,7 @@ class Cube {
 
   draw(matrix) {
     this.gl.useProgram(this.program)
-    // console.log(state)
+
     this.updateBufferData(this.gl, this.vertices(), this.vertexBufferObject)
 
     this.gl.vertexAttribPointer(
