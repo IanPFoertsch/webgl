@@ -20,9 +20,9 @@ var initDemo = function(state) {
 
     //obtain the current state & generate a view update matrix from it
     var translation = translationMatrix(state.translation[0], state.translation[1], 0)
-    var z_rotate = zRotation(state.rotation)
-    var y_rotate = yRotation(0)
-    var x_rotate = xRotation(state.rotation)
+    var z_rotate = zRotation(0)
+    var y_rotate = yRotation(state.rotation + .5)
+    var x_rotate = xRotation(-0.5)
     var matrix = multiply4(x_rotate, y_rotate)
     matrix = multiply4(matrix, z_rotate)
 
