@@ -75,8 +75,6 @@ class RotationHandler {
 
 class TranslationUpdate {
   constructor(event) {
-    this.x = event.clientX
-    this.y = event.clientY
     this.translation = [event.clientX, event.clientY, 0.0]
     this.rotation = [0.0, 0.0, 0.0]
   }
@@ -84,8 +82,6 @@ class TranslationUpdate {
 
 class RotationUpdate {
   constructor(event) {
-    this.x = event.clientX
-    this.y = event.clientY
     this.translation = [0.0, 0.0, 0.0]
     this.rotation = [event.clientX, event.clientY, 0.0]
   }
@@ -93,8 +89,6 @@ class RotationUpdate {
 
 class Update {
   constructor(event) {
-    this.x = event.clientX
-    this.y = event.clientY
     this.translation = [0.0, 0.0, 0.0]
     this.rotation = [0.0, 0.0, 0.0]
   }
@@ -122,22 +116,6 @@ class MouseMoveInputHandler {
   }
 }
 
-class ControlDownInputHandler {
-  //ControlDown accepts an existing update and transforms it to rotational update
-  // data
-  constructor(state, canvas) {
-    this.state = state
-    this.canvas = canvas
-  }
-
-  handleEvent(event, update) {
-    update.rotation = update.translation[0]
-    update.translation[0] = 0.0
-    update.translation[1] = 0.0
-    return update
-  }
-}
-
 class InputHandler {
   constructor(state, canvas) {
     this.state = state
@@ -158,6 +136,16 @@ class InputHandler {
       this.defaultHandler.outputNode = this.translationHandler
     }
     this.canvas.onmouseup = (event) => {
+      //set existing translation & rotation
+      this.state.existingRotation[0] = this.state.rotation[0]
+      this.state.existingRotation[1] = this.state.rotation[1]
+      this.state.existingRotation[2] = this.state.rotation[2]
+      this.state.existingTranslation[0] = this.state.translation[0]
+      this.state.existingTranslation[1] = this.state.translation[1]
+      this.state.existingTranslation[2] = this.state.translation[2]
+      this.state.rotation = [0,0,0]
+      this.state.translation = [0,0,0]
+      this.state.origin = [0,0,0]
       this.defaultHandler.outputNode = null
     }
     document.addEventListener("keydown", event => {
@@ -173,7 +161,6 @@ class InputHandler {
   }
 
   handleMouseMoveInput(event) {
-
     var update = this.defaultHandler.handleEvent(event)
     // var stateUpdate = this.stack.reduce((oldUpdate, handler) => {
     //   var newUpdate = handler.handleEvent(event, oldUpdate)
@@ -208,9 +195,7 @@ class InputHandler {
   }
 
   stateUpdate(update) {
-
-    //TODO: WE should be able to not store the mousedown origin on the actual state,
-    //but rather in something we add to the stack
+    //TODO: WE should be able to not store the mousedown origin on the actual state. This is hamhanded
 
     var normalizedX = (update.translation[0] - this.state.origin[0]) / this.canvas.width
     //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
@@ -220,7 +205,9 @@ class InputHandler {
     this.state.translation[0] = normalizedX + this.state.existingTranslation[0]
     this.state.translation[1] = normalizedY + this.state.existingTranslation[1]
 
-    this.state.rotation[1] = update.rotation[1] / 10
+    console.log(this.state.translation)
+
+    // this.state.rotation[1] = update.rotation[1] / 10
   }
 }
 
