@@ -15,21 +15,20 @@ var initDemo = function(state) {
   const gl = canvas.getContext("webgl");
 
   var cube = new Cube([], canvas, gl)
-
+  var translationValue = []
   var loop = function() {
 
     //obtain the current state & generate a view update matrix from it
-    var translation = translationMatrix(state.translation[0], state.translation[1], 0)
+    var translationValues = state.getTranslation()
+    var rotationValues = state.getRotation()
+    var translation = translationMatrix(translationValues[0], translationValues[1], 0)
 
     var z_rotate = zRotation(0)
-    var y_rotate = yRotation(state.rotation[1] + .5)
-
-    var x_rotate = xRotation(-0.5)
+    var y_rotate = yRotation(rotationValues[0] + 0.5)
+    var x_rotate = xRotation(rotationValues[1] + -0.5)
 
     var matrix = multiply4(x_rotate, y_rotate)
-
     matrix = multiply4(matrix, z_rotate)
-
     matrix = multiply4(translation, matrix)
 
     //clear the current drawing & redraw our objects
