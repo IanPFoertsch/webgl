@@ -86,7 +86,6 @@ describe("Tree", function() {
       it("returns an array containing the terminus & origin of each child element", () => {
         var tree = new Tree({origin: [0,0], length: 1, angle: 0.0, propagate: 1, angle_variance: 0})
         var vertices = tree.vertices()
-        console.log(vertices)
         expect(vertices).toVectorEqual([0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 2, 0])
       })
     })
