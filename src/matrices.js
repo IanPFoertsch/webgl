@@ -82,6 +82,15 @@ var identityMatrix = function() {
   ]
 }
 
+var projectionMatrix = function(width, height, depth) {
+  return [
+    2 / width, 0, 0, 0,
+    0, -2 / height, 0, 0,
+    0, 0, 2 / depth, 0,
+    -1, 1, 0, 1,
+  ]
+}
+
 //fieldOfViewInRadians
 //aspect - image's width to height
 //near - describes where things will be clipped in the near plane
@@ -116,4 +125,4 @@ var zRotate = function(matrix, angleInRadians) {
 
 
 
-export { multiply4, translationMatrix, identityMatrix, perspectiveMatrix, xRotate, yRotate, zRotate, translate   }
+export { multiply4, translationMatrix, projectionMatrix, perspectiveMatrix, xRotate, yRotate, zRotate, translate   }

@@ -6,15 +6,15 @@ class Cube {
     // this.origin = origin
     this.canvas = canvas
     this.gl = gl
-    var a = [-0.5, -0.5, 0.5]
-    var b = [-0.5, 0.5, 0.5]
-    var c = [0.5, 0.5, 0.5]
-    var d = [0.5, -0.5, 0.5]
+    var a = [-5, -5, 5]
+    var b = [-5, 5, 5]
+    var c = [5, 5, 5]
+    var d = [5, -5, 5]
 
-    var e = [-0.5, -0.5, -0.5]
-    var f = [-0.5, 0.5, -0.5]
-    var g = [0.5, 0.5, -0.5]
-    var h = [0.5, -0.5, -0.5]
+    var e = [-5, -5, -5]
+    var f = [-5, 5, -5]
+    var g = [5, 5, -5]
+    var h = [5, -5, -5]
 
     var red = [1,0,0,1]
     var green = [0,1,0,1]
@@ -64,10 +64,12 @@ class Cube {
       uniform mat4 matrix;
       attribute vec4 inputColor;
       varying vec4 vertexColor;
+      uniform vec3 origin;
 
       void main() {
-        vec4 extendedPosition = vec4(vertexPosition, 1);
-        gl_Position = matrix * extendedPosition;
+        vec4 worldspacePosition = vec4(origin + vertexPosition, 1.0);
+
+        gl_Position = matrix * worldspacePosition;
         vertexColor = inputColor;
       }
     `
@@ -121,6 +123,8 @@ class Cube {
     this.gl.enableVertexAttribArray(this.colorAttributeLocation)
 
     var matrixLocation = this.gl.getUniformLocation(this.program, "matrix")
+    var originLocation = this.gl.getUniformLocation(this.program, "origin")
+    this.gl.uniform3fv(originLocation, [30, 30, 30])
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix)
     var num_vertices = this.vertices().length / 7
 
