@@ -1,5 +1,8 @@
 "use strict"
 
+//most of this was shamelessly copied from https://webglfundamentals.org/webgl/lessons/
+
+
 //Note: due to low level details in opengl, we're following the programming notation of
 // rows & columns being inverted from mathematical convention
 var multiply4 = function(a, b) {
@@ -79,4 +82,38 @@ var identityMatrix = function() {
   ]
 }
 
-export { multiply4, zRotation, yRotation, xRotation, translationMatrix, identityMatrix }
+//fieldOfViewInRadians
+//aspect - image's width to height
+//near - describes where things will be clipped in the near plane
+//far - describes where things will be clipped in the far plane
+var perspectiveMatrix = function(fieldOfViewInRadians, aspect, near, far) {
+  var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+  var rangeInv = 1.0 / (near - far);
+
+  return [
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (near + far) * rangeInv, -1,
+    0, 0, near * far * rangeInv * 2, 0
+  ];
+}
+
+var translate = function(matrix, tx, ty, tz) {
+  return multiply4(matrix, translationMatrix(tx, ty, tz))
+}
+
+var xRotate = function(matrix, angleInRadians) {
+  return multiply4(matrix, xRotation(angleInRadians))
+}
+
+var yRotate = function(matrix, angleInRadians) {
+  return multiply4(matrix, yRotation(angleInRadians))
+}
+
+var zRotate = function(matrix, angleInRadians) {
+  return multiply4(matrix, zRotation(angleInRadians))
+}
+
+
+
+export { multiply4, translationMatrix, identityMatrix, perspectiveMatrix, xRotate, yRotate, zRotate, translate   }
