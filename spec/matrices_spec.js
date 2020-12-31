@@ -1,7 +1,31 @@
 "use strict"
 
-import { multiply4 } from "../src/matrices.js"
+import { multiply4, inverse } from "../src/matrices.js"
 import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
+
+describe("inverse", () => {
+  var a = [
+    1, 2, 3, 4,
+    5, 6, 7, 8,
+    9, 10, 11, 0,
+    2, 2, 300, 1
+  ]
+
+  var b = [
+    1, 2, 3, 4,
+    5, 6, 7, 8,
+    9, 10, 11, 12,
+    13, 14, 15, 16
+  ]
+
+  fit("inverts the matrix ", () => {
+    var inverted = inverse(a)
+    var identity = multiply4(a, inverted)
+
+    // console.log(inverted)
+    console.log(identity)
+  })
+})
 
 
 describe("multiply4", function() {
