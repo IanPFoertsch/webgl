@@ -85,9 +85,9 @@ var identityMatrix = function() {
 var projectionMatrix = function(width, height, depth) {
   return [
     2 / width, 0, 0, 0,
-    0, -2 / height, 0, 0,
+    0, 2 / height, 0, 0,
     0, 0, 2 / depth, 0,
-    -1, 1, 0, 1,
+    1, 1, 0, 1,
   ]
 }
 
@@ -103,7 +103,7 @@ var perspectiveMatrix = function(fieldOfViewInRadians, aspect, near, far) {
     f / aspect, 0, 0, 0,
     0, f, 0, 0,
     0, 0, (near + far) * rangeInv, -1,
-    0, 0, near * far * rangeInv * 2, 0
+    0, 0, (near * far) * rangeInv * 2, 0
   ];
 }
 

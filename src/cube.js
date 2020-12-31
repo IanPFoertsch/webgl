@@ -2,19 +2,19 @@
 class Cube {
   //should contain both the webgl representation & the CPU data
 
-  constructor(vertices, canvas, gl) {
-    // this.origin = origin
+  constructor(origin, vertices, canvas, gl) {
+    this.origin = origin
     this.canvas = canvas
     this.gl = gl
-    var a = [-5, -5, 5]
-    var b = [-5, 5, 5]
-    var c = [5, 5, 5]
-    var d = [5, -5, 5]
+    var a = [-50, -50, 50]
+    var b = [-50, 50, 50]
+    var c = [50, 50, 50]
+    var d = [50, -50, 50]
 
-    var e = [-5, -5, -5]
-    var f = [-5, 5, -5]
-    var g = [5, 5, -5]
-    var h = [5, -5, -5]
+    var e = [-50, -50, -50]
+    var f = [-50, 50, -50]
+    var g = [50, 50, -50]
+    var h = [50, -50, -50]
 
     var red = [1,0,0,1]
     var green = [0,1,0,1]
@@ -124,7 +124,7 @@ class Cube {
 
     var matrixLocation = this.gl.getUniformLocation(this.program, "matrix")
     var originLocation = this.gl.getUniformLocation(this.program, "origin")
-    this.gl.uniform3fv(originLocation, [30, 30, 30])
+    this.gl.uniform3fv(originLocation, this.origin)
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix)
     var num_vertices = this.vertices().length / 7
 

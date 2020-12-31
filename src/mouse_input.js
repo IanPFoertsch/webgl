@@ -59,10 +59,12 @@ class TranslationUpdate {
     //need access to origin somehow
     //TODO: WE should be able to not store the mousedown origin on the actual state. This is hamhanded
     //TODO: just dividing by the hardcoded height/width of the canvas here. This is bad - > we should find some way to derive this
-    var normalizedX = (event.clientX - origin[0]) / 700
-    //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
-    //rather than add it
-    var normalizedY = (origin[1] - event.clientY) / 700
+    var normalizedX = (event.clientX - origin[0])
+
+    //Note: The events have an inverted Y axis, because the top of the canvas is considered y = 0
+    // with Y increasing as it goes down the canvas
+    //so we subtract the event's Y coordinate rather than add it
+    var normalizedY = (origin[1] - event.clientY)
 
     this.translation = [normalizedX, normalizedY, 0.0]
     this.rotation = [0.0, 0.0, 0.0]

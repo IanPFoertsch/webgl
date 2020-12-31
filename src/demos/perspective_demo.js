@@ -14,32 +14,45 @@ var initDemo = function(state) {
   var canvas = document.getElementById('glCanvas');
   const gl = canvas.getContext("webgl");
 
-  var cube = new Cube([], canvas, gl)
+  var cube = new Cube([0, 0, -200], [], canvas, gl)
   var translationValue = []
 
   var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
-  var fieldOfViewInRadians = 1
+  var fieldOfViewInRadians = 1.5
   var zNear = 1
   var zFar = 2000
   var perspective = perspectiveMatrix(fieldOfViewInRadians, aspect, zNear, zFar)
   var projection = projectionMatrix(gl.canvas.clientWidth, gl.canvas.clientHeight, gl.canvas.clientWidth)
-  console.log(projection)
+  var translationValues = state.getTranslation()
+  var rotationValues = state.getRotation()
+  // var matrix = translate(persp)
+
+  // var translation = translate(translationValues[0], translationValues[1], 0)
+  var matrix = translate(perspective, translationValues[0], translationValues[1], 0)
+
+  matrix = xRotate(matrix, rotationValues[1] - 0.5)
+  // var matrix = xRotate(translation, rotationValues[1] - 0.5)
+  matrix = yRotate(matrix, rotationValues[0] + 0.5)
+  matrix = zRotate(matrix, 0)
+  console.log(matrix)
+
   var loop = function() {
 
     //obtain the current state & generate a view update matrix from it
+
     var translationValues = state.getTranslation()
     var rotationValues = state.getRotation()
     // var matrix = translate(persp)
 
     // var translation = translate(translationValues[0], translationValues[1], 0)
-    var matrix = translate(projection, translationValues[0], translationValues[1], 0)
+    var matrix = translate(perspective, translationValues[0], translationValues[1], 0)
 
-    matrix = xRotate(matrix, rotationValues[1] - 0.5)
+    matrix = xRotate(matrix, rotationValues[1])
     // var matrix = xRotate(translation, rotationValues[1] - 0.5)
-    matrix = yRotate(matrix, rotationValues[0] + 0.5)
-    matrix = zRotate(matrix, 0)
+    matrix = yRotate(matrix, rotationValues[0])
+    matrix = zRotate(matrix, rotationValues[1], rotationValues[0])
 
-
+    console.log("x: ", rotationValues[1], "\ny: ", rotationValues[0])
     //clear the current drawing & redraw our objects
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
