@@ -18,7 +18,7 @@ describe("inverse", () => {
     13, 14, 15, 16
   ]
 
-  fit("inverts the matrix ", () => {
+  it("inverts the matrix ", () => {
     var inverted = inverse(a)
     var identity = multiply4(a, inverted)
 
