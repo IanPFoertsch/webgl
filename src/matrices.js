@@ -224,6 +224,7 @@ export {
   translationMatrix,
   projectionMatrix,
   perspectiveMatrix,
+  identityMatrix,
   xRotate,
   yRotate,
   zRotate,
