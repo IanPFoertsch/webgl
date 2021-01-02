@@ -1,7 +1,6 @@
 'use strict'
 
-
-import { RotationUpdate } from "./mouse_input.js"
+import { CameraState } from "./camera_state.js"
 
 class State {
   constructor() {
@@ -9,9 +8,10 @@ class State {
     this.existingTranslation = [0.0, 0.0, 0.0]
     this.rotation = [0.0, 0.0, 0.0]
     this.existingRotation = [0.0, 0.0, 0.0]
-    this.inputState = {}
 
+    this.cameraState = new CameraState()
   }
+
 
   zeroAndSave() {
     this.existingRotation = this.getRotation()
@@ -19,14 +19,18 @@ class State {
 
     this.rotation = [0,0,0]
     this.translation = [0,0,0]
+    this.cameraState.zeroAndSave()
   }
 
   updateFromEvent(update, event) {
     //Don't need to add existing translation here
     this.translation[0] = update.translation[0]
     this.translation[1] = update.translation[1]
+
     this.rotation[0] = update.rotation[0] / 10
     this.rotation[1] = update.rotation[1] / 10
+
+    this.cameraState.updateFromEvent(update, event)
   }
 
   getTranslation() {
@@ -40,6 +44,14 @@ class State {
     return this.rotation.map((item, index) => {
       return item + this.existingRotation[index]
     })
+  }
+
+  getFocalTarget() {
+    return this.cameraState.getFocalTarget()
+  }
+
+  getCameraPosition() {
+    return this.cameraState.getCameraPosition()
   }
 }
 

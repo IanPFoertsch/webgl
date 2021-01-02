@@ -40,7 +40,7 @@ var zRotation = function(radians) {
   ]
 }
 
-var xRotation = function(angleInRadians) {
+var xRotation = function(angleInRadians, rotationPoint) {
   var cos = Math.cos(angleInRadians);
   var sin = Math.sin(angleInRadians);
 
@@ -48,11 +48,11 @@ var xRotation = function(angleInRadians) {
     1, 0, 0, 0,
     0, cos, sin, 0,
     0, -sin, cos, 0,
-    0, 0, 0, 1,
+    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
   ];
 }
 
-var yRotation = function(angleInRadians) {
+var yRotation = function(angleInRadians, rotationPoint) {
   var cos = Math.cos(angleInRadians);
   var sin = Math.sin(angleInRadians);
 
@@ -60,7 +60,7 @@ var yRotation = function(angleInRadians) {
     cos, 0, -sin, 0,
     0, 1, 0, 0,
     sin, 0, cos, 0,
-    0, 0, 0, 1,
+    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
   ];
 }
 
@@ -111,17 +111,29 @@ var translate = function(matrix, tx, ty, tz) {
   return multiply4(matrix, translationMatrix(tx, ty, tz))
 }
 
-var xRotate = function(matrix, angleInRadians) {
-  return multiply4(matrix, xRotation(angleInRadians))
+var xRotationMatrix = function(angleInRadians, rotationPoint) {
+  var cos = Math.cos(angleInRadians);
+  var sin = Math.sin(angleInRadians);
+
+  return [
+    1, 0, 0, 0,
+    0, cos, sin, 0,
+    0, -sin, cos, 0,
+    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+  ];
 }
 
-var yRotate = function(matrix, angleInRadians) {
-  return multiply4(matrix, yRotation(angleInRadians))
+var xRotateAroundPoint = function(vectorToRotate, angleInRadians, target) {
+  var vec4 = vectorToRotate.concat(4)
+  var x_rotation_matrix = xRotationMatrix(angleInRadians, target)
+
+  // console.log("the x rotation", x_rotation)
+  // console.log(vectorToRotate)
+  // console.log(x_rotation_matrix[15])
+  // console.log(vectorMatrixMultiply(vectorToRotate, x_rotation_matrix)[15])
+  return vectorMatrixMultiply(vec4, x_rotation_matrix)
 }
 
-var zRotate = function(matrix, angleInRadians) {
-  return multiply4(matrix, zRotation(angleInRadians))
-}
 
 // all credit to
 // https://webglfundamentals.org/webgl/lessons/webgl-3d-camera.html
@@ -256,6 +268,18 @@ var lookAt = function(cameraPosition, target, up) {
   ];
 }
 
+var vectorMatrixMultiply = function(vec4, mat4) {
+  //Really this is a kind of matrix-matrix multiplication, but
+  //for implementation reasons we've split this out to two functions
+
+  return [
+    ((vec4[0] * mat4[0]) + (vec4[1] * mat4[4]) + (vec4[2] * mat4[8]) + (vec4[3] * mat4[12])),
+    ((vec4[0] * mat4[1]) + (vec4[1] * mat4[5]) + (vec4[2] * mat4[9]) + (vec4[3] * mat4[13])),
+    ((vec4[0] * mat4[2]) + (vec4[1] * mat4[6]) + (vec4[2] * mat4[10]) + (vec4[3] * mat4[14])),
+    ((vec4[0] * mat4[3]) + (vec4[1] * mat4[7]) + (vec4[2] * mat4[11]) + (vec4[3] * mat4[15]))
+  ]
+}
+
 
 export {
   multiply4,
@@ -263,13 +287,11 @@ export {
   projectionMatrix,
   perspectiveMatrix,
   identityMatrix,
-  xRotate,
-  yRotate,
-  zRotate,
   translate,
   inverse,
   yRotation,
   xRotation,
   zRotation,
-  lookAt
+  lookAt,
+  xRotateAroundPoint
 }

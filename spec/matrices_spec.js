@@ -1,7 +1,23 @@
 "use strict"
 
-import { multiply4, inverse } from "../src/matrices.js"
-import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
+import { multiply4, inverse, vectorMatrixMultiply } from "../src/matrices.js"
+// import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
+
+describe("xRotateAroundPoint", () => {
+  var vectorToRotate = [0,0,-300]
+  var matrixToMultiply = [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    1, 0, 0, 1
+  ]
+
+  fit("calculates", () => {
+    console.log(vectorToRotate.concat(1))
+    // console.log(vectorMatrixMultiply(vecto))
+  })
+
+})
 
 describe("inverse", () => {
   var a = [
