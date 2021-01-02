@@ -2,16 +2,13 @@
 
 import {
   multiply4,
-  translationMatrix,
-  projectionMatrix,
   perspectiveMatrix,
   identityMatrix,
   xRotate,
   yRotate,
-  zRotate,
   translate,
   inverse,
-  yRotation
+  lookAt
 } from "./matrices.js"
 
 class ViewMatrixManager {
@@ -36,20 +33,27 @@ class ViewMatrixManager {
     //NOTE: About the y-value translation we're applying here. This is complicated because of the
     // transformation between the camera and the world space. We're inverting the view to
     // move the "world" in front of the camera, rather than moving the camera around.
-    //This is when we move the camera in the z-plane, it basically zooms in and out, rather than moving linearly in Z,
-    //Because we're literally moving a tilted viewport along z.
+    //When we move the camera in the z-axis, it basically zooms in and out,
+    // rather than moving linearly along the Z-X horizontal plane, because we're
+    // literally moving a tilted viewport along z.
     // Therefore, when we want to move along a constant "horizontal" x-z plane, we need to apply
     // a y-component to the translation vector, to move vertically up and down to compensate.
     // this y-vector can be derived from our current y-rotation, basically at high y-rotation, we want a large
     // y-vector component, and vice versa at small y-rotation.
     // This is computed simply with Sin(y-rotation)
     // If I had a more advanced understanding of how our view is calculated, we could probably simplify this massively.
-    return - ( this.negateYTranslation(translationValues) * Math.sin( this.state.getRotation()[1]))
+    return - (
+      this.negateYTranslation(translationValues) *
+      Math.sin( this.state.getRotation()[1])
+    )
   }
 
   zTranslation(translationValues) {
-    //NOTE: For similar reasons to correcting by the cos(y-angle) when computing the
-    return  - ( this.negateYTranslation(translationValues) *  Math.cos( this.state.getRotation()[1])) + 200
+    //NOTE: For similar reasons to correcting by the cos(y-angle) when computing the Z translation
+    return  - (
+      this.negateYTranslation(translationValues) *
+      Math.cos( this.state.getRotation()[1])
+    ) + 200 // add our initial viewpoint zoomed out
   }
 
   negateYTranslation(translationValues) {
@@ -60,7 +64,6 @@ class ViewMatrixManager {
   }
 
   updateViewTranslation(cameraMatrix) {
-
     var translationValues = this.state.getTranslation()
 
     cameraMatrix = translate(
@@ -72,6 +75,13 @@ class ViewMatrixManager {
     return cameraMatrix
   }
 
+  updateViewRotation(cameraMatrix) {
+    cameraMatrix = yRotate(cameraMatrix, this.state.getRotation()[0])
+    cameraMatrix = xRotate(cameraMatrix, this.state.getRotation()[1])
+
+    return cameraMatrix
+  }
+
   getUpdatedViewMatrix() {
     var perspective = perspectiveMatrix(
       ViewMatrixManager.FIELD_OF_VIEW_IN_RADIANS,
@@ -79,19 +89,15 @@ class ViewMatrixManager {
       ViewMatrixManager.ZNEAR,
       ViewMatrixManager.ZFAR
     )
-
-    var cameraMatrix = yRotate(identityMatrix(), this.state.getRotation()[0])
-    cameraMatrix = xRotate(cameraMatrix, this.state.getRotation()[1])
+    var cameraMatrix = identityMatrix()
 
 
+    cameraMatrix = this.updateViewRotation(cameraMatrix, this.state)
     cameraMatrix = this.updateViewTranslation(cameraMatrix, this.state)
+    console.log(this.state.getRotation()[1])
 
     var viewMatrix = inverse(cameraMatrix)
     var viewProjectionMatrix = multiply4(perspective, viewMatrix)
-    //obtain the current state & generate a view update matrix from it
-
-
-    // var rotationValues = state.getRotation()
 
     return viewProjectionMatrix
   }

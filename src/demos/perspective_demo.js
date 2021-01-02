@@ -28,6 +28,8 @@ var initDemo = function(state) {
   const gl = canvas.getContext("webgl");
 
   var cube = new Cube([0, 0, 0], [], canvas, gl)
+  var otherCube = new Cube([50, 50, 50], [], canvas, gl)
+  var thirdCube = new Cube([-55, 15, 50], [], canvas, gl)
   var viewMatrixManager = new ViewMatrixManager(canvas, gl, state)
 
   var matrix = []
@@ -40,8 +42,10 @@ var initDemo = function(state) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.enable(gl.DEPTH_TEST)
-    //NOTE: Lines need at least 2 points you jabranus\
+    
     cube.draw(matrix)
+    otherCube.draw(matrix)
+    thirdCube.draw(matrix)
     // box.draw(matrix)
     requestAnimationFrame(loop)
   }
