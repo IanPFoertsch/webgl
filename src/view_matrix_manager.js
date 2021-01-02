@@ -3,12 +3,9 @@
 import {
   multiply4,
   perspectiveMatrix,
-  identityMatrix,
-  xRotate,
-  yRotate,
-  translate,
   inverse,
-  lookAt
+  lookAt,
+  xRotateAroundPoint
 } from "./matrices.js"
 
 class ViewMatrixManager {
@@ -22,8 +19,6 @@ class ViewMatrixManager {
     this.canvas = canvas
     this.gl = gl
     this.state = state
-    this.translationValue = []
-
     this.aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
   }
 
@@ -42,18 +37,19 @@ class ViewMatrixManager {
     // y-vector component, and vice versa at small y-rotation.
     // This is computed simply with Sin(y-rotation)
     // If I had a more advanced understanding of how our view is calculated, we could probably simplify this massively.
+    // TODO: turn this into a matrix?
     return - (
-      this.negateYTranslation(translationValues) *
-      Math.sin( this.state.getRotation()[1])
+      this.negateYTranslation(translationValues) // *
+      // Math.sin( this.state.getRotation()[1])
     )
   }
 
   zTranslation(translationValues) {
     //NOTE: For similar reasons to correcting by the cos(y-angle) when computing the Z translation
     return  - (
-      this.negateYTranslation(translationValues) *
-      Math.cos( this.state.getRotation()[1])
-    ) + 200 // add our initial viewpoint zoomed out
+      this.negateYTranslation(translationValues) // *
+      // Math.cos( this.state.getRotation()[1])
+    ) // add our initial viewpoint zoomed out
   }
 
   negateYTranslation(translationValues) {
@@ -63,23 +59,32 @@ class ViewMatrixManager {
     return - translationValues[1]
   }
 
-  updateViewTranslation(cameraMatrix) {
-    var translationValues = this.state.getTranslation()
-
-    cameraMatrix = translate(
-      cameraMatrix,
-      this.xTranslation(translationValues),
-      this.yTranslation(translationValues),
-      this.zTranslation(translationValues) // Z translation -> need to scale this as well by cos(y-angle?)
-    )
-    return cameraMatrix
+  translateVector(vector, translationValues) {
+    //use vector multiplication here
+    return [
+      vector[0] + this.xTranslation(translationValues),
+      vector[1] + this.yTranslation(translationValues),
+      vector[2] + this.zTranslation(translationValues),
+    ]
   }
 
-  updateViewRotation(cameraMatrix) {
-    cameraMatrix = yRotate(cameraMatrix, this.state.getRotation()[0])
-    cameraMatrix = xRotate(cameraMatrix, this.state.getRotation()[1])
+  verticalCameraRotation(cameraPosition, angleInRadians, target) {
 
-    return cameraMatrix
+    return xRotateAroundPoint(cameraPosition, angleInRadians, target)
+  }
+
+  updateViewRotation(cameraMatrix, rotationPoint) {
+    //rotation point is a 3-vector (converted to 4-vector at calculation time)
+    //describing the point we're rotating around: for the moment we can consider
+    //this to be a spot on the x-z plane
+
+    //mix up here: we apply the X rotation value to the Y-rotation function. Why exactly?
+    // B/c we're rotation _AROUND_ the Y-axis, which results in "horizontal", or x-z plane rotation
+    // cameraMatrix = yRotate(cameraMatrix, this.state.getRotation()[0])
+
+    // cameraMatrix = xRotate(cameraMatrix, this.state.getRotation()[1])
+
+    // return cameraMatrix
   }
 
   getUpdatedViewMatrix() {
@@ -89,14 +94,21 @@ class ViewMatrixManager {
       ViewMatrixManager.ZNEAR,
       ViewMatrixManager.ZFAR
     )
-    var cameraMatrix = identityMatrix()
+    var target = this.state.getFocalTarget()
+    //now: update the camera & target matrices when we transate
+    // cameraMatrix = this.updateViewRotation(cameraMatrix, this.state)
 
-
-    cameraMatrix = this.updateViewRotation(cameraMatrix, this.state)
-    cameraMatrix = this.updateViewTranslation(cameraMatrix, this.state)
-    console.log(this.state.getRotation()[1])
+    var cameraPosition = this.state.getCameraPosition()
+    //TODO: This should be implemented in state when we're updating from events: the viewMatrixManager should just
+    //be responsible for generating the new matrix from the state.
+    // cameraPosition = this.verticalCameraRotation(this.state.cameraPosition, this.state.getRotation()[1], target)
+    // console.log(cameraPosition)
+    // console.log("cameraPosition", cameraPosition)
+    // this.verticalCameraRotation(this.state.cameraPosition, this.state.getRotation()[1], target)
+    var cameraMatrix = lookAt(cameraPosition, target, [0, 1, 0])
 
     var viewMatrix = inverse(cameraMatrix)
+
     var viewProjectionMatrix = multiply4(perspective, viewMatrix)
 
     return viewProjectionMatrix

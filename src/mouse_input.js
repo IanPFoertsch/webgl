@@ -65,7 +65,6 @@ class TranslationUpdate {
     // with Y increasing as it goes down the canvas
     //so we subtract the event's Y coordinate rather than add it
     var normalizedY = (origin[1] - event.clientY )
-    
 
     this.translation = [normalizedX, normalizedY, 0.0]
     this.rotation = [0.0, 0.0, 0.0]
