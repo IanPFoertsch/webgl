@@ -162,4 +162,4 @@ function initMouseHandlers(state) {
   const inputHandler = new InputHandler(state, canvas)
 }
 
-export { initMouseHandlers, RotationUpdate }
+export { initMouseHandlers, RotationUpdate, TranslationUpdate}

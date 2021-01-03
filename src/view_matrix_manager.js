@@ -5,7 +5,7 @@ import {
   perspectiveMatrix,
   inverse,
   lookAt,
-  xRotateAroundPoint
+  xAxisRotationAroundPoint
 } from "./matrices.js"
 
 class ViewMatrixManager {
@@ -70,7 +70,7 @@ class ViewMatrixManager {
 
   verticalCameraRotation(cameraPosition, angleInRadians, target) {
 
-    return xRotateAroundPoint(cameraPosition, angleInRadians, target)
+    return xAxisRotationAroundPoint(cameraPosition, angleInRadians, target)
   }
 
   updateViewRotation(cameraMatrix, rotationPoint) {

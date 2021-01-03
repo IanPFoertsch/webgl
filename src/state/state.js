@@ -1,6 +1,7 @@
 'use strict'
 
 import { CameraState } from "./camera_state.js"
+import { RotationUpdate } from "../mouse_input.js"
 
 class State {
   constructor() {
@@ -29,7 +30,7 @@ class State {
 
     this.rotation[0] = update.rotation[0] / 10
     this.rotation[1] = update.rotation[1] / 10
-
+    
     this.cameraState.updateFromEvent(update, event)
   }
 
