@@ -40,18 +40,6 @@ var zRotation = function(radians) {
   ]
 }
 
-var xRotation = function(angleInRadians, rotationPoint) {
-  var cos = Math.cos(angleInRadians);
-  var sin = Math.sin(angleInRadians);
-
-  return [
-    1, 0, 0, 0,
-    0, cos, sin, 0,
-    0, -sin, cos, 0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
-  ];
-}
-
 var yRotation = function(angleInRadians, rotationPoint) {
   var cos = Math.cos(angleInRadians);
   var sin = Math.sin(angleInRadians);
@@ -119,14 +107,13 @@ var xRotationMatrix = function(angleInRadians, rotationPoint) {
     1, 0, 0, 0,
     0, cos, sin, 0,
     0, -sin, cos, 0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+    0, 0, 0, 1,
   ];
 }
 
-var xRotateAroundPoint = function(vectorToRotate, angleInRadians, target) {
-  var vec4 = vectorToRotate.concat(4)
+var xAxisRotationAroundPoint = function(vectorToRotate, angleInRadians, target) {
+  var vec4 = vectorToRotate.concat(1)
   var x_rotation_matrix = xRotationMatrix(angleInRadians, target)
-
   // console.log("the x rotation", x_rotation)
   // console.log(vectorToRotate)
   // console.log(x_rotation_matrix[15])
@@ -290,8 +277,9 @@ export {
   translate,
   inverse,
   yRotation,
-  xRotation,
   zRotation,
   lookAt,
-  xRotateAroundPoint
+  xAxisRotationAroundPoint,
+  vectorMatrixMultiply,
+  subtractVectors
 }

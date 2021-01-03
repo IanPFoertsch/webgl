@@ -3,19 +3,41 @@
 import { multiply4, inverse, vectorMatrixMultiply } from "../src/matrices.js"
 // import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
 
-describe("xRotateAroundPoint", () => {
-  var vectorToRotate = [0,0,-300]
-  var matrixToMultiply = [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    1, 0, 0, 1
-  ]
+describe("xAxisRotationAroundPoint", () => {
 
-  fit("calculates", () => {
-    console.log(vectorToRotate.concat(1))
-    // console.log(vectorMatrixMultiply(vecto))
+  it("multiplying by an identity matrix results in an identical vector", () => {
+    var vectorToRotate = [1, 2, 3, 4]
+    var matrixToMultiply = [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ]
+
+    var result = vectorMatrixMultiply(vectorToRotate, matrixToMultiply)
+    expect(result).toVectorEqual(vectorToRotate)
   })
+
+  it("with a simple matrix to multiply by it creates the expected result", () => {
+    var vectorToRotate = [1, 2, 3, 4]
+    var matrixToMultiply = [
+      1, 2, 3, 4,
+      5, 6, 7, 8,
+      9, 10, 11, 12,
+      13, 14, 15, 16
+    ]
+    var result = vectorMatrixMultiply(vectorToRotate, matrixToMultiply)
+
+    expect(result).toVectorEqual(
+      [
+        1 + 10 + 27 + 52,
+        2 + 12 + 30 + 56,
+        3+ 14 + 33 + 60,
+        4 + 16 + 36 + 64
+      ]
+    )
+  })
+
 
 })
 
