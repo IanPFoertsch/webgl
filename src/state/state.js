@@ -28,9 +28,9 @@ class State {
     this.translation[0] = update.translation[0]
     this.translation[1] = update.translation[1]
 
-    this.rotation[0] = update.rotation[0] / 10
-    this.rotation[1] = update.rotation[1] / 10
-    
+    this.rotation[0] = update.rotation[0]
+    this.rotation[1] = update.rotation[1]
+
     this.cameraState.updateFromEvent(update, event)
   }
 
