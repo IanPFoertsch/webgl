@@ -1,8 +1,12 @@
 'use strict'
 import { RotationUpdate, TranslationUpdate } from "../mouse_input.js"
 import {
+  multiply4,
+  xRotationMatrix,
+  yRotationMatrix,
   xAxisRotationAroundPoint,
-  subtractVectors
+  vectorMatrixMultiply,
+  subtractVectors,
 } from "../matrices.js"
 
 
@@ -46,15 +50,25 @@ class CameraState {
     this.activeCameraPosition[2] = - update.translation[1]
   }
 
+  rotationAroundPoint(yRotation, xRotation) {
+
+  }
+
   updateFromRotationEvent(update, event) {
-    //rotate the stored camera position by our input event
-    var verticalRotation = xAxisRotationAroundPoint(this.storedCameraPosition, update.rotation[1], this.focalTarget)
-    // multiply vertical & horizontal rotation matrices? -> i thiiiink
-    //take the differential between the rotated position and the stored camera position
-    var differential = subtractVectors(verticalRotation, this.storedCameraPosition)
-    //That differential becomes the active camera position
+
+    var rotation_target_vector = this.focalTarget.concat(1)
+
+    //TODO: Make the scaling factor of the x-y rotation dynamic
+    var vertical_rotation = xRotationMatrix(update.rotation[1] / 50, rotation_target_vector)
+    var horizontal_rotation = yRotationMatrix(update.rotation[0] / 50, rotation_target_vector)
+    var combined_rotation_matrix = multiply4(horizontal_rotation, vertical_rotation)
+    //apply combined_rotation_matrix to storedCameraPosition vector
+    var rotated_camera_location = vectorMatrixMultiply(this.storedCameraPosition.concat(1), combined_rotation_matrix)
+
+    var differential = subtractVectors(rotated_camera_location, this.storedCameraPosition)
+
     this.activeCameraPosition = differential
-    // console.log("ending camera position: ", JSON.stringify(this.getCameraPosition()))
+    
   }
 
   updateFromEvent(update, event) {
