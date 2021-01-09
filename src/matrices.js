@@ -29,29 +29,6 @@ var multiply4 = function(a, b) {
   return [c11, c12, c13, c14, c21, c22, c23, c24, c31, c32, c33, c34, c41, c42, c43, c44]
 }
 
-var zRotation = function(radians) {
-  var sin = Math.sin(radians)
-  var cos = Math.cos(radians)
-  return [
-    cos, - sin, 0, 0,
-    sin,   cos, 0, 0,
-    0,       0, 1,  0,
-    0,       0, 0, 1
-  ]
-}
-
-var yRotationMatrix = function(angleInRadians, rotationPoint) {
-  var cos = Math.cos(angleInRadians);
-  var sin = Math.sin(angleInRadians);
-
-  return [
-    cos, 0, -sin, 0,
-    0, 1, 0, 0,
-    sin, 0, cos, 0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
-  ];
-}
-
 var translationMatrix = function(tx, ty, tz) {
   return [
     1,  0,  0, 0,
@@ -109,6 +86,30 @@ var xRotationMatrix = function(angleInRadians, rotationPoint) {
     0, -sin, cos, 0,
     rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
   ];
+}
+
+var yRotationMatrix = function(angleInRadians, rotationPoint) {
+  var cos = Math.cos(angleInRadians);
+  var sin = Math.sin(angleInRadians);
+
+  return [
+    cos, 0, -sin, 0,
+    0, 1, 0, 0,
+    sin, 0, cos, 0,
+    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+  ];
+}
+
+var zRotationmatrix = function(angleInRadians, rotationPoint) {
+  var cos = Math.cos(angleInRadians);
+  var sin = Math.sin(angleInRadians);
+
+  return [
+    cos, - sin, 0, 0,
+    sin,   cos, 0, 0,
+    0,       0, 1,  0,
+    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+  ]
 }
 
 var xAxisRotationAroundPoint = function(vectorToRotate, angleInRadians, target) {
@@ -276,10 +277,10 @@ export {
   identityMatrix,
   translate,
   inverse,
-  yRotationMatrix,
-  zRotation,
-  lookAt,
   xRotationMatrix,
+  yRotationMatrix,
+  zRotationmatrix,
+  lookAt,
   xAxisRotationAroundPoint,
   vectorMatrixMultiply,
   subtractVectors
