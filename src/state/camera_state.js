@@ -4,7 +4,7 @@ import {
   multiply4,
   xRotationMatrix,
   yRotationMatrix,
-  xAxisRotationAroundPoint,
+  zRotationmatrix,
   vectorMatrixMultiply,
   subtractVectors,
 } from "../matrices.js"
@@ -55,20 +55,27 @@ class CameraState {
   }
 
   updateFromRotationEvent(update, event) {
-
     var rotation_target_vector = this.focalTarget.concat(1)
 
     //TODO: Make the scaling factor of the x-y rotation dynamic
-    var vertical_rotation = xRotationMatrix(update.rotation[1] / 50, rotation_target_vector)
-    var horizontal_rotation = yRotationMatrix(update.rotation[0] / 50, rotation_target_vector)
-    var combined_rotation_matrix = multiply4(horizontal_rotation, vertical_rotation)
-    //apply combined_rotation_matrix to storedCameraPosition vector
+    //NOTE: the "vertical" rotation includes both X and Z components.
+    // this is because when our view is rotated 90degrees around the vertical y-axis
+    // (we're viewing the scene from the "right"), if we attempt to rotate the scene
+    // vertically around the x-axis, there is no or muted effect, because we're
+    // _on_ the x-axis, so rotating the point about the x-axis doesn't result in much
+    // vertical camera motion.
+    var x_rotation = xRotationMatrix(update.rotation[1] / 50, rotation_target_vector)
+    var z_rotation = zRotationmatrix(update.rotation[1] / 50, rotation_target_vector)
+    var y_rotation = yRotationMatrix(update.rotation[0] / 50, rotation_target_vector)
+
+    var vertical_rotation_matrix = multiply4(x_rotation, z_rotation)
+    var combined_rotation_matrix = multiply4(vertical_rotation_matrix, y_rotation)
+
     var rotated_camera_location = vectorMatrixMultiply(this.storedCameraPosition.concat(1), combined_rotation_matrix)
 
     var differential = subtractVectors(rotated_camera_location, this.storedCameraPosition)
-
     this.activeCameraPosition = differential
-    
+
   }
 
   updateFromEvent(update, event) {
