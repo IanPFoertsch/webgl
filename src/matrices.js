@@ -76,7 +76,7 @@ var translate = function(matrix, tx, ty, tz) {
   return multiply4(matrix, translationMatrix(tx, ty, tz))
 }
 
-var xRotationMatrix = function(angleInRadians, rotationPoint) {
+var xRotationMatrix = function(angleInRadians) {
   var cos = Math.cos(angleInRadians);
   var sin = Math.sin(angleInRadians);
 
@@ -84,11 +84,11 @@ var xRotationMatrix = function(angleInRadians, rotationPoint) {
     1, 0, 0, 0,
     0, cos, sin, 0,
     0, -sin, cos, 0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+    0, 0, 0, 1,
   ];
 }
 
-var yRotationMatrix = function(angleInRadians, rotationPoint) {
+var yRotationMatrix = function(angleInRadians) {
   var cos = Math.cos(angleInRadians);
   var sin = Math.sin(angleInRadians);
 
@@ -96,7 +96,7 @@ var yRotationMatrix = function(angleInRadians, rotationPoint) {
     cos, 0, -sin, 0,
     0, 1, 0, 0,
     sin, 0, cos, 0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+    0,0,0 , 1,
   ];
 }
 
@@ -108,7 +108,7 @@ var zRotationmatrix = function(angleInRadians, rotationPoint) {
     cos, - sin, 0, 0,
     sin,   cos, 0, 0,
     0,       0, 1,  0,
-    rotationPoint[0], rotationPoint[1], rotationPoint[2], 1,
+    0, 0, 0, 1,
   ]
 }
 
@@ -268,6 +268,39 @@ var vectorMatrixMultiply = function(vec4, mat4) {
   ]
 }
 
+var dot_product = function(vector_a, vector_b) {
+  if (vector_a.length !== vector_b.length) {
+    throw new Error("Attempting to take dot product of vectors with different lengths")
+  }
+
+  var result = vector_a.map((item, index) => {
+    return item * vector_b[index]
+  }).reduce((sum, item) => {
+    return sum + item}, 0
+  )
+  return result
+
+}
+
+var vector_magnitude = function(vector) {
+  return Math.sqrt(
+    vector.reduce((sum, item) => {
+      return (item * item) + sum
+    }, 0)
+  )
+}
+
+var angle_between_vectors = function(vector_a, vector_b) {
+  var a_dot_b = dot_product(vector_a, vector_b)
+  var vector_a_magnitude = vector_magnitude(vector_a)
+  var vector_b_magnitude = vector_magnitude(vector_b)
+
+  var combined_magnitudes = vector_a_magnitude * vector_b_magnitude
+  if (combined_magnitudes === 0) {
+    throw new Error("Attempting to measure the angle between a vector and an empty vector")
+  }
+  return Math.acos(a_dot_b / (vector_a_magnitude * vector_b_magnitude))
+}
 
 export {
   multiply4,
@@ -283,5 +316,8 @@ export {
   lookAt,
   xAxisRotationAroundPoint,
   vectorMatrixMultiply,
-  subtractVectors
+  dot_product,
+  subtractVectors,
+  vector_magnitude,
+  angle_between_vectors
 }
