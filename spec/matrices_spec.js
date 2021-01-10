@@ -1,7 +1,17 @@
 "use strict"
 
-import { multiply4, inverse, vectorMatrixMultiply } from "../src/matrices.js"
+import {
+  multiply4,
+  inverse,
+  vectorMatrixMultiply,
+  dot_product,
+  vector_magnitude,
+  angle_between_vectors
+} from "../src/matrices.js"
 // import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
+var radians_to_degrees = function(radians) {
+  return (radians * 180) / Math.PI
+}
 
 describe("xAxisRotationAroundPoint", () => {
 
@@ -56,15 +66,132 @@ describe("inverse", () => {
     13, 14, 15, 16
   ]
 
-  it("inverts the matrix ", () => {
-    var inverted = inverse(a)
-    var identity = multiply4(a, inverted)
+  // it("inverts the matrix ", () => {
+  //   var inverted = inverse(a)
+  //   var identity = multiply4(a, inverted)
+  //
+  //   // console.log(inverted)
+  //   // console.log(identity)
+  // })
+})
 
-    // console.log(inverted)
-    console.log(identity)
+describe("dot product", () => {
+
+  describe("with vectors of different lengths", () => {
+    it("raises an exception", () => {
+      var vector_1 = [1, 2]
+      var vector_2 = [4, 5, 6]
+      expect(
+        () => { dot_product(vector_1, vector_2)}
+      ).toThrow(
+        new Error("Attempting to take dot product of vectors with different lengths")
+      )
+    })
+  })
+
+  describe("with vectors of equal length", () => {
+    it("with positive values it creates the expected result", () => {
+      var vector_1 = [1, 2, 3]
+      var vector_2 = [4, 5, 6]
+      expect(dot_product(vector_1, vector_2)).toEqual(32)
+    })
+
+    it("with perpendicular unit vectors", () => {
+      var vector_1 = [0, 0, 1]
+      var vector_2 = [1, 0, 0]
+      expect(dot_product(vector_1, vector_2)).toEqual(0)
+    })
+
+    it("with another set of perpendicular unit vector", () => {
+      var vector_1 = [0, 0, 1]
+      var vector_2 = [0, 1, 0]
+      expect(dot_product(vector_1, vector_2)).toEqual(0)
+    })
   })
 })
 
+describe("vector_magnitude", () => {
+  describe("with unit vectors", () => {
+    it("calculates a magnitude of 1", () => {
+      var vector = [0,0,1]
+      expect(vector_magnitude(vector)).toEqual(1)
+    })
+    it("calculates a magnitude of 1", () => {
+      var vector = [0,1,0]
+      expect(vector_magnitude(vector)).toEqual(1)
+    })
+    it("calculates a magnitude of 1", () => {
+      var vector = [1,0,0]
+      expect(vector_magnitude(vector)).toEqual(1)
+    })
+  })
+
+  describe("with non-unit vectors", () => {
+    it("calculates the length", () => {
+      var vector = [3, 4, 5]
+      expect(vector_magnitude(vector)).toEqual(
+        Math.sqrt((3 * 3) + (4 * 4) + (5 * 5))
+      )
+    })
+  })
+})
+
+describe("angle_between_vectors", () => {
+  describe("with perpendicular angles", () => {
+    it("returns a 90 degree angle", () => {
+      var vector_a = [1,0,0]
+      var vector_b = [0,1,0]
+      var angle_in_radians = angle_between_vectors(vector_a, vector_b)
+      expect(radians_to_degrees(angle_in_radians)).toEqual(90)
+    })
+
+    it("returns a 90 degree angle", () => {
+      var vector_a = [1,0,0]
+      var vector_b = [0,0,1]
+      var angle_in_radians = angle_between_vectors(vector_a, vector_b)
+      expect(radians_to_degrees(angle_in_radians)).toEqual(90)
+    })
+  })
+
+  describe("with parallel angles", () => {
+    it("returns a 0 degree angle", () => {
+      var vector_a = [1,0,0]
+      var vector_b = [20,0,0]
+      var angle_in_radians = angle_between_vectors(vector_a, vector_b)
+      expect(radians_to_degrees(angle_in_radians)).toEqual(0)
+    })
+
+    it("returns a 0 degree angle", () => {
+      var vector_a = [1,2,3]
+      var vector_b = [2,4,6]
+      var angle_in_radians = angle_between_vectors(vector_a, vector_b)
+      expect(radians_to_degrees(angle_in_radians)).toEqual(0)
+    })
+  })
+
+  describe("with an all-zero vector ", () => {
+    //NOTE: this might not be the correct behavior, but as the result with an all 0-vector
+    //is undefined, I'm not sure what would happen to the application
+    it("throws an error", () => {
+      var vector_a = [0,0,0]
+      var vector_b = [1,0,0]
+
+      expect(() => {
+        angle_between_vectors(vector_a, vector_b)
+      }).toThrow(
+        new Error("Attempting to measure the angle between a vector and an empty vector")
+      )
+    })
+  })
+
+  describe("with negative vector values", () => {
+    fit("returns a smaller than 90 degree result", () => {
+      var x_axis_vector = [1, 0, 0]
+      var camera_vector = [-128, -31, -317 ]
+      console.log(angle_between_vectors(camera_vector, x_axis_vector))
+    })
+  })
+})
 
 describe("multiply4", function() {
   describe("with all positive values", () => {
