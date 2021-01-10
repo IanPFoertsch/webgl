@@ -63,14 +63,22 @@ class CameraState {
     // vertically around the x-axis, there is no or muted effect, because we're
     // _on_ the x-axis, so rotating the point about the x-axis doesn't result in much
     // vertical camera motion.
-    var ninety_degrees = 1.5707963267948966
 
-    var angle_to_y_x_plane = ninety_degrees - angle_between_vectors(this.storedCameraPosition, [0,0,1])
+
+    //TODO - this subtract from ninety degree thing we're doing here seems ham-handed
+    //We could likely simplify this by taking the angle to a different vector
+    var ninety_degrees = 1.5707963267948966
+    //NOTE: We're scaling the input based on how close we are to the various planes
+    //For example: when perpendicular to the y-x plane, (basically on the z-axis)
+    // perform full x-axis rotataion.
+
+    var camera_location = this.getCameraPosition()
+    var angle_to_y_x_plane = ninety_degrees - angle_between_vectors(camera_location, [0,0,1])
     var x_rotation_scaling  = Math.sin(angle_to_y_x_plane)
 
-    var angle_to_y_z_plane = ninety_degrees - angle_between_vectors(this.storedCameraPosition, [1,0,0])
+    var angle_to_y_z_plane = ninety_degrees - angle_between_vectors(camera_location, [1,0,0])
     var z_rotation_scaling  = Math.sin(angle_to_y_z_plane)
-    console.log(z_rotation_scaling)
+    // console.log(this.getCameraPosition())
     var x_rotation = xRotationMatrix((- update.rotation[1] / 20) * x_rotation_scaling, rotation_target_vector)
     // console.log("x-axis", JSON.stringify(update.rotation[0]), "y-axis", JSON.stringify(- update.rotation[1]))
     var z_rotation = zRotationmatrix((- update.rotation[1] / 20) * z_rotation_scaling, rotation_target_vector)
@@ -88,7 +96,7 @@ class CameraState {
     var rotated_camera_location = vectorMatrixMultiply(this.storedCameraPosition.concat(1), combined_rotation_matrix)
     // console.log(rotated_camera_location)
     var differential = subtractVectors(rotated_camera_location, this.storedCameraPosition)
-    // console.log(JSON.stringify(differential))
+    
     this.activeCameraPosition = differential
 
   }
