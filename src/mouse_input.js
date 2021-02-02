@@ -73,6 +73,7 @@ class TranslationUpdate {
 
 class RotationUpdate {
   constructor(event, origin) {
+    console.log(event)
     // I'm not,like...100% sure why we need to invert the normalizedX value here...
     // something to do with how we're rotating around
     // the y-axis when we're rotating the x-coordinate plane.

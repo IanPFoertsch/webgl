@@ -17,11 +17,11 @@ class CameraState {
     this.existingFocalTarget = [0.0, 0.0, 0.0]
 
     this.activeCameraPosition = [0.0, 0.0, 0.0]
-    this.storedCameraPosition = [0.0, 0.0, -300.0]
+    this.existingCameraPosition = [0.0, 0.0, -300.0]
   }
 
   zeroAndSave() {
-    this.storedCameraPosition = this.getCameraPosition()
+    this.existingCameraPosition = this.getCameraPosition()
     this.existingFocalTarget = this.getFocalTarget()
 
     this.focalTarget = [0,0,0]
@@ -51,11 +51,8 @@ class CameraState {
     this.activeCameraPosition[2] = - update.translation[1]
   }
 
-  rotationAroundPoint(yRotation, xRotation) {
-
-  }
-
   updateFromRotationEvent(update, event) {
+    this.horizontal_plane_rotation(update)
     var rotation_target_vector = this.focalTarget.concat(1)
     //NOTE: the "vertical" rotation includes both X and Z components.
     // this is because when our view is rotated 90degrees around the vertical y-axis
@@ -92,13 +89,40 @@ class CameraState {
 
 
     // console.log("v:", this.matrix_to_string(vertical_rotation_matrix))
-    // console.log(this.storedCameraPosition)
-    var rotated_camera_location = vectorMatrixMultiply(this.storedCameraPosition.concat(1), combined_rotation_matrix)
+    // console.log(this.existingCameraPosition)
+    var rotated_camera_location = vectorMatrixMultiply(this.existingCameraPosition.concat(1), combined_rotation_matrix)
     // console.log(rotated_camera_location)
-    var differential = subtractVectors(rotated_camera_location, this.storedCameraPosition)
-    
+    var differential = subtractVectors(rotated_camera_location, this.existingCameraPosition)
+
     this.activeCameraPosition = differential
 
+  }
+
+  horizontal_plane_rotation(update) {
+    //TODO: I think we can simplify this to get rid of the "active" & "existing" camera & focal point positions
+    // console.log(update.rotation)
+    // horizontal plane rotataion is update.rotation[0] -> this doesn't really
+    // follow the x,y convention but it intuitively makes sense, as we're rotating \
+    // in the horizontal plane around the y-axis
+    var y_axis_rotation = update.rotation[0]
+    console.log(y_axis_rotation)
+    console.log(this.activeCameraPosition)
+    console.log(this.existingCameraPosition)
+    //NOTES FOR IMPLEMENTATION - to rotate in the horizontal z-x plane around the vertical y-axis
+    // 1. Translate camera and focal point to origin
+    // 2. Rotate around the y-axis
+    // 3. reverse the translation back to the starting point, plus the rotation
+  }
+
+
+  vertical_rotation() {
+    //NOTES FOR IMPLEMENTATION - to rotate vertically around a virtual x-axis.
+    // This accomplishes both x and z axis rotation. However we do it around a virtual x-axis
+    // 1. Translate camera and focal point to origin
+    // 2. Rotate camera -> focal point y-angle back to zero
+    // 3. Perform the x-axis rotation
+    // 4. Reverse the y-axis rotation
+    // 5. Reverse the initial translation
   }
 
   matrix_to_string(matrix) {
@@ -123,7 +147,7 @@ class CameraState {
 
   getCameraPosition() {
     return this.activeCameraPosition.map((item, index) => {
-      return item + this.storedCameraPosition[index]
+      return item + this.existingCameraPosition[index]
     })
   }
 }
