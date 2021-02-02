@@ -29,7 +29,7 @@ class TranslationHandler {
 
   handleEvent(update) {
     if (this.outputNode === null) {
-      var update = new TranslationUpdate(event, this.origin)
+      var update = new TranslationUpdate(event)
       this.state.updateFromEvent(update)
     } else {
       return this.outputNode.handleEvent(event)
@@ -46,7 +46,7 @@ class RotationHandler {
 
   handleEvent(update) {
     if (this.outputNode === null) {
-      var update = new RotationUpdate(event, this.origin)
+      var update = new RotationUpdate(event)
       this.state.updateFromEvent(update)
     } else {
       return this.outputNode.handleEvent(event)
@@ -55,35 +55,17 @@ class RotationHandler {
 }
 
 class TranslationUpdate {
-  constructor(event, origin) {
-    //need access to origin somehow
-    //TODO: WE should be able to not store the mousedown origin on the actual state. This is hamhanded
-    //TODO: just dividing by the hardcoded height/width of the canvas here. This is bad - > we should find some way to derive this
-    var normalizedX = (event.clientX - origin[0])
-
-    //Note: The events have an inverted Y axis, because the top of the canvas is considered y = 0
-    // with Y increasing as it goes down the canvas
-    //so we subtract the event's Y coordinate rather than add it
-    var normalizedY = (origin[1] - event.clientY )
-
-    this.translation = [normalizedX, normalizedY, 0.0]
+  constructor(event) {
+    this.translation = [event.movementX, event.movementY, 0.0]
     this.rotation = [0.0, 0.0, 0.0]
   }
 }
 
 class RotationUpdate {
-  constructor(event, origin) {
-    console.log(event)
-    // I'm not,like...100% sure why we need to invert the normalizedX value here...
-    // something to do with how we're rotating around
-    // the y-axis when we're rotating the x-coordinate plane.
-    var normalizedX = (origin[0] - event.clientX) / 10
-    //Note: The events have an inverted Y axis, so we subtract the event's Y coordinate
-    //rather than add it
-    var normalizedY = (origin[1] - event.clientY) / 10
+  constructor(event) {
     this.translation = [0.0, 0.0, 0.0]
 
-    this.rotation = [normalizedX, normalizedY, 0.0]
+    this.rotation = [event.movementX, event.movementY, 0.0]
   }
 }
 

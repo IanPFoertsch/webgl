@@ -5,6 +5,7 @@ import {
   inverse,
   vectorMatrixMultiply,
   dot_product,
+  vector_addition,
   vector_magnitude,
   angle_between_vectors
 } from "../src/matrices.js"
@@ -12,6 +13,35 @@ import {
 var radians_to_degrees = function(radians) {
   return (radians * 180) / Math.PI
 }
+
+describe("vector_addition", () => {
+  fit("throws an exception with vectors of different length", () => {
+    var vector_a = [1, 2, 3]
+    var vector_b = [4, 5, 6, 7]
+
+    expect(
+      () => { vector_addition(vector_a, vector_b)}
+    ).toThrow(
+      new Error("Attempting to add vectors of different length")
+    )
+  })
+
+  it("adds the vectors together", () => {
+    var vector_a = [1, 2, 3]
+    var vector_b = [4, 5, 6]
+    expect(
+      vector_addition(vector_a, vector_b)
+    ).toVectorEqual([5,7,9])
+  })
+
+  it("performs a commutative operation", () => {
+    var vector_a = [1, 2, 3]
+    var vector_b = [4, 5, 6]
+    expect(
+      vector_addition(vector_b, vector_a)
+    ).toVectorEqual([5,7,9])
+  })
+})
 
 describe("xAxisRotationAroundPoint", () => {
 
@@ -185,7 +215,7 @@ describe("angle_between_vectors", () => {
   })
 
   describe("with negative vector values", () => {
-    fit("returns a smaller than 90 degree result", () => {
+    it("returns a smaller than 90 degree result", () => {
       var x_axis_vector = [1, 0, 0]
       var camera_vector = [-128, -31, -317 ]
       console.log(angle_between_vectors(camera_vector, x_axis_vector))

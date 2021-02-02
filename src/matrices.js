@@ -302,6 +302,16 @@ var angle_between_vectors = function(vector_a, vector_b) {
   return Math.acos(a_dot_b / (vector_a_magnitude * vector_b_magnitude))
 }
 
+var vector_addition = function(vector_a, vector_b) {
+  if (vector_a.length != vector_b.length) {
+    throw new Error("Attempting to add vectors of different length")
+  }
+
+  return vector_a.map((item, index) => {
+    return item + vector_b[index]
+  })
+}
+
 export {
   multiply4,
   translationMatrix,
@@ -318,6 +328,7 @@ export {
   vectorMatrixMultiply,
   dot_product,
   subtractVectors,
+  vector_addition,
   vector_magnitude,
   angle_between_vectors
 }
