@@ -5,6 +5,7 @@ import {
   xRotationMatrix,
   yRotationMatrix,
   zRotationmatrix,
+  vector_addition,
   vectorMatrixMultiply,
   subtractVectors,
   angle_between_vectors
@@ -14,45 +15,33 @@ import {
 class CameraState {
   constructor() {
     this.focalTarget = [0.0, 0.0, 0.0]
-    this.existingFocalTarget = [0.0, 0.0, 0.0]
-
-    this.activeCameraPosition = [0.0, 0.0, 0.0]
-    this.existingCameraPosition = [0.0, 0.0, -300.0]
+    this.cameraPosition = [0.0, 0.0, -300.0]
   }
 
   zeroAndSave() {
-    this.existingCameraPosition = this.getCameraPosition()
-    this.existingFocalTarget = this.getFocalTarget()
 
-    this.focalTarget = [0,0,0]
-    this.activeCameraPosition = [0,0,0]
   }
 
 
   updateFromTranslationEvent(update, event) {
-    //need to:
-    // 1- move the camera in the x-z plane
-    //    a. correct the z-movement by the cos(theta) of the current x-axis (vertical)
-    //       rotation
-    // 2- move the focal target the same amount in the x-z plane
-
     // TODO: When translating, (ie click & dragging view) we should project
     // A ray from camera to focal target onto the x-z horizonatal plane, and scale the
     // X-Z translation based on how zoomed out we are, so that we click & drag a greater
     // amount for a given mouse input when we're very zoomed out.
 
-    this.focalTarget[0] = update.translation[0]
+    this.focalTarget[0] += update.translation[0]
     //todo: scale this by current vertical rotation
     //Z-axis updated from Y-axis mouse input
-    this.focalTarget[2] = - update.translation[1]
+    this.focalTarget[2] += - update.translation[1]
 
-    this.activeCameraPosition[0] = update.translation[0]
+    this.cameraPosition[0] += update.translation[0]
     //todo: scale this by current vertical rotation
-    this.activeCameraPosition[2] = - update.translation[1]
+    this.cameraPosition[2] += - update.translation[1]
   }
 
   updateFromRotationEvent(update, event) {
     this.horizontal_plane_rotation(update)
+
     var rotation_target_vector = this.focalTarget.concat(1)
     //NOTE: the "vertical" rotation includes both X and Z components.
     // this is because when our view is rotated 90degrees around the vertical y-axis
@@ -60,7 +49,6 @@ class CameraState {
     // vertically around the x-axis, there is no or muted effect, because we're
     // _on_ the x-axis, so rotating the point about the x-axis doesn't result in much
     // vertical camera motion.
-
 
     //TODO - this subtract from ninety degree thing we're doing here seems ham-handed
     //We could likely simplify this by taking the angle to a different vector
@@ -70,6 +58,7 @@ class CameraState {
     // perform full x-axis rotataion.
 
     var camera_location = this.getCameraPosition()
+
     var angle_to_y_x_plane = ninety_degrees - angle_between_vectors(camera_location, [0,0,1])
     var x_rotation_scaling  = Math.sin(angle_to_y_x_plane)
 
@@ -89,13 +78,12 @@ class CameraState {
 
 
     // console.log("v:", this.matrix_to_string(vertical_rotation_matrix))
-    // console.log(this.existingCameraPosition)
-    var rotated_camera_location = vectorMatrixMultiply(this.existingCameraPosition.concat(1), combined_rotation_matrix)
-    // console.log(rotated_camera_location)
-    var differential = subtractVectors(rotated_camera_location, this.existingCameraPosition)
 
-    this.activeCameraPosition = differential
+    var rotated_camera_location = vectorMatrixMultiply(this.cameraPosition.concat(1), combined_rotation_matrix)
 
+    var differential = subtractVectors(rotated_camera_location, this.cameraPosition)
+
+    this.cameraPosition = vector_addition(this.cameraPosition, differential)
   }
 
   horizontal_plane_rotation(update) {
@@ -105,9 +93,9 @@ class CameraState {
     // follow the x,y convention but it intuitively makes sense, as we're rotating \
     // in the horizontal plane around the y-axis
     var y_axis_rotation = update.rotation[0]
-    console.log(y_axis_rotation)
-    console.log(this.activeCameraPosition)
-    console.log(this.existingCameraPosition)
+    // console.log(y_axis_rotation)
+    // console.log(this.activeCameraPosition)
+    // console.log(this.existingCameraPosition)
     //NOTES FOR IMPLEMENTATION - to rotate in the horizontal z-x plane around the vertical y-axis
     // 1. Translate camera and focal point to origin
     // 2. Rotate around the y-axis
@@ -140,15 +128,11 @@ class CameraState {
   }
 
   getFocalTarget() {
-    return this.focalTarget.map((item, index) => {
-      return item + this.existingFocalTarget[index]
-    })
+    return this.focalTarget.slice()
   }
 
   getCameraPosition() {
-    return this.activeCameraPosition.map((item, index) => {
-      return item + this.existingCameraPosition[index]
-    })
+    return this.cameraPosition.slice()
   }
 }
 
