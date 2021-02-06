@@ -94,9 +94,9 @@ var yRotationMatrix = function(angleInRadians) {
 
   return [
     cos, 0, -sin, 0,
-    0, 1, 0, 0,
-    sin, 0, cos, 0,
-    0,0,0 , 1,
+    0,   1, 0,    0,
+    sin, 0, cos,  0,
+    0,   0, 0,    1
   ];
 }
 
@@ -223,11 +223,6 @@ var cross = function(a, b) {
           a[0] * b[1] - a[1] * b[0]];
 }
 
-//all credit to https://webglfundamentals.org/webgl/lessons/webgl-3d-camera.html
-var subtractVectors = function(a, b) {
-  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-}
-
 var normalize = function(v) {
   var length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
   // make sure we don't divide by 0.
@@ -241,7 +236,7 @@ var normalize = function(v) {
 //all credit to https://webglfundamentals.org/webgl/lessons/webgl-3d-camera.html
 var lookAt = function(cameraPosition, target, up) {
   var zAxis = normalize(
-      subtractVectors(cameraPosition, target));
+      vector_subtraction(cameraPosition, target));
   var xAxis = normalize(cross(up, zAxis));
   var yAxis = normalize(cross(zAxis, xAxis));
 
@@ -303,13 +298,31 @@ var angle_between_vectors = function(vector_a, vector_b) {
 }
 
 var vector_addition = function(vector_a, vector_b) {
-  if (vector_a.length != vector_b.length) {
+  if (vector_a.length !== vector_b.length) {
     throw new Error("Attempting to add vectors of different length")
   }
 
   return vector_a.map((item, index) => {
     return item + vector_b[index]
   })
+}
+
+var vector_subtraction = function(vector_a, vector_b) {
+  if (vector_a.length !== 3 || vector_b.length !== 3) {
+    throw new Error("Attempting to subtract vectors not equal to length 3")
+  }
+
+  //all credit to https://webglfundamentals.org/webgl/lessons/webgl-3d-camera.html
+  // NOTE: keeping this not javascript-y format here to improve runtime
+  return [vector_a[0] - vector_b[0], vector_a[1] - vector_b[1], vector_a[2] - vector_b[2]];
+}
+
+var vector_inverse = function(vector) {
+  if (vector.length !== 3) {
+    throw new Error("Attempting to invert a vector with length not equal to 3")
+  }
+
+  return [- vector[0], - vector[1], -vector[2]]
 }
 
 export {
@@ -327,8 +340,10 @@ export {
   xAxisRotationAroundPoint,
   vectorMatrixMultiply,
   dot_product,
-  subtractVectors,
   vector_addition,
+  vector_inverse,
   vector_magnitude,
+  vector_subtraction,
+
   angle_between_vectors
 }

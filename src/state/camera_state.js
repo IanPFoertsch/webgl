@@ -6,8 +6,9 @@ import {
   yRotationMatrix,
   zRotationmatrix,
   vector_addition,
+  vector_inverse,
   vectorMatrixMultiply,
-  subtractVectors,
+  vector_subtraction,
   angle_between_vectors
 } from "../matrices.js"
 
@@ -17,11 +18,6 @@ class CameraState {
     this.focalTarget = [0.0, 0.0, 0.0]
     this.cameraPosition = [0.0, 0.0, -300.0]
   }
-
-  zeroAndSave() {
-
-  }
-
 
   updateFromTranslationEvent(update, event) {
     // TODO: When translating, (ie click & dragging view) we should project
@@ -40,66 +36,45 @@ class CameraState {
   }
 
   updateFromRotationEvent(update, event) {
-    this.horizontal_plane_rotation(update)
+    // this.horizontal_plane_rotation(update)
 
     var rotation_target_vector = this.focalTarget.concat(1)
-    //NOTE: the "vertical" rotation includes both X and Z components.
-    // this is because when our view is rotated 90degrees around the vertical y-axis
-    // (we're viewing the scene from the "right"), if we attempt to rotate the scene
-    // vertically around the x-axis, there is no or muted effect, because we're
-    // _on_ the x-axis, so rotating the point about the x-axis doesn't result in much
-    // vertical camera motion.
-
-    //TODO - this subtract from ninety degree thing we're doing here seems ham-handed
-    //We could likely simplify this by taking the angle to a different vector
-    var ninety_degrees = 1.5707963267948966
-    //NOTE: We're scaling the input based on how close we are to the various planes
-    //For example: when perpendicular to the y-x plane, (basically on the z-axis)
-    // perform full x-axis rotataion.
 
     var camera_location = this.getCameraPosition()
 
-    var angle_to_y_x_plane = ninety_degrees - angle_between_vectors(camera_location, [0,0,1])
-    var x_rotation_scaling  = Math.sin(angle_to_y_x_plane)
-
-    var angle_to_y_z_plane = ninety_degrees - angle_between_vectors(camera_location, [1,0,0])
-    var z_rotation_scaling  = Math.sin(angle_to_y_z_plane)
-    // console.log(this.getCameraPosition())
-    var x_rotation = xRotationMatrix((- update.rotation[1] / 20) * x_rotation_scaling, rotation_target_vector)
-    // console.log("x-axis", JSON.stringify(update.rotation[0]), "y-axis", JSON.stringify(- update.rotation[1]))
-    var z_rotation = zRotationmatrix((- update.rotation[1] / 20) * z_rotation_scaling, rotation_target_vector)
-    var y_rotation = yRotationMatrix(update.rotation[0] / 20, rotation_target_vector)
-    // console.log("x:", this.matrix_to_string(x_rotation))
-    // console.log("z:", this.matrix_to_string(z_rotation))
-    var vertical_rotation_matrix = multiply4(x_rotation, z_rotation)
-    // console.log("y:", this.matrix_to_string(y_rotation))
-    // console.log("v:", this.matrix_to_string(y_rotation))
-    var combined_rotation_matrix = multiply4(vertical_rotation_matrix, y_rotation)
-
-
-    // console.log("v:", this.matrix_to_string(vertical_rotation_matrix))
-
-    var rotated_camera_location = vectorMatrixMultiply(this.cameraPosition.concat(1), combined_rotation_matrix)
-
-    var differential = subtractVectors(rotated_camera_location, this.cameraPosition)
-
-    this.cameraPosition = vector_addition(this.cameraPosition, differential)
+    this.cameraPosition = this.horizontal_plane_rotation(update)
   }
 
   horizontal_plane_rotation(update) {
-    //TODO: I think we can simplify this to get rid of the "active" & "existing" camera & focal point positions
-    // console.log(update.rotation)
     // horizontal plane rotataion is update.rotation[0] -> this doesn't really
     // follow the x,y convention but it intuitively makes sense, as we're rotating \
     // in the horizontal plane around the y-axis
-    var y_axis_rotation = update.rotation[0]
-    // console.log(y_axis_rotation)
-    // console.log(this.activeCameraPosition)
-    // console.log(this.existingCameraPosition)
+
     //NOTES FOR IMPLEMENTATION - to rotate in the horizontal z-x plane around the vertical y-axis
     // 1. Translate camera and focal point to origin
-    // 2. Rotate around the y-axis
-    // 3. reverse the translation back to the starting point, plus the rotation
+    //   a. get diff between camera and focal point
+    var focal_point_to_camera = vector_subtraction(this.cameraPosition, this.focalTarget)
+
+    var focal_point_to_origin = vector_inverse(this.focalTarget)
+
+    var camera_position_at_origin = vector_addition(this.cameraPosition, focal_point_to_origin)
+
+    var y_rotation = yRotationMatrix(update.rotation[0] / 200)
+    //vector-matrix multiply to get rotated camera position
+
+    var rotated_camera_position_at_origin = vectorMatrixMultiply(
+      camera_position_at_origin.concat(1),
+      y_rotation
+    ).slice(0,3)
+    // console.log(y_rotation)
+
+    var new_camera_position = vector_addition(
+      rotated_camera_position_at_origin,
+      this.focalTarget
+    )
+
+
+    return new_camera_position
   }
 
 
