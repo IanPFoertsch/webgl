@@ -96,7 +96,6 @@ class InputHandler {
       this.defaultHandler.outputNode = this.translationHandler
     }
     this.canvas.onmouseup = (event) => {
-      this.state.zeroAndSave()
       this.defaultHandler.outputNode = null
     }
     document.addEventListener("keydown", event => {

@@ -6,7 +6,9 @@ import {
   vectorMatrixMultiply,
   dot_product,
   vector_addition,
+  vector_inverse,
   vector_magnitude,
+  vector_subtraction,
   angle_between_vectors
 } from "../src/matrices.js"
 // import { mat4 } from "../node_modules/gl-matrix/gl-matrix.js"
@@ -15,7 +17,7 @@ var radians_to_degrees = function(radians) {
 }
 
 describe("vector_addition", () => {
-  fit("throws an exception with vectors of different length", () => {
+  it("throws an exception with vectors of different length", () => {
     var vector_a = [1, 2, 3]
     var vector_b = [4, 5, 6, 7]
 
@@ -40,6 +42,55 @@ describe("vector_addition", () => {
     expect(
       vector_addition(vector_b, vector_a)
     ).toVectorEqual([5,7,9])
+  })
+})
+
+describe("vector_addition", () => {
+  it("throws an exception with a vector not of length 3", () => {
+    var vector = [1, 2, 3, 4]
+
+
+    expect(
+      () => { vector_inverse(vector)}
+    ).toThrow(
+      new Error("Attempting to invert a vector with length not equal to 3")
+    )
+  })
+
+  it("inverts the vector", () => {
+    var vector_a = [1, 2, 3]
+    expect(
+      vector_inverse(vector_a)
+    ).toVectorEqual([-1, -2, -3])
+  })
+})
+
+describe("vector_subtraction", () => {
+  it("throws an exception with vectors of different length", () => {
+    var vector_a = [1, 2, 3]
+    var vector_b = [4, 5, 6, 7]
+
+    expect(
+      () => { vector_subtraction(vector_a, vector_b)}
+    ).toThrow(
+      new Error("Attempting to subtract vectors not equal to length 3")
+    )
+  })
+
+  it("subtracts the second vector from the first the vectors together", () => {
+    var vector_a = [1, 6, 3]
+    var vector_b = [4, 5, 9]
+    expect(
+      vector_subtraction(vector_a, vector_b)
+    ).toVectorEqual([-3, 1, -6])
+  })
+
+  it("is not commutative", () => {
+    var vector_a = [1, 2, 3]
+    var vector_b = [4, 8, -1]
+    expect(
+      vector_subtraction(vector_b, vector_a)
+    ).toVectorEqual([3, 6, -4])
   })
 })
 
@@ -77,8 +128,6 @@ describe("xAxisRotationAroundPoint", () => {
       ]
     )
   })
-
-
 })
 
 describe("inverse", () => {

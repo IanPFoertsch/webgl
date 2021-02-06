@@ -8,11 +8,6 @@ class State {
     this.cameraState = new CameraState()
   }
 
-
-  zeroAndSave() {
-    this.cameraState.zeroAndSave()
-  }
-
   updateFromEvent(update, event) {
     this.cameraState.updateFromEvent(update, event)
   }
