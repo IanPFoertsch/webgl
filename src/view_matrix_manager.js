@@ -105,8 +105,9 @@ class ViewMatrixManager {
     // console.log(cameraPosition)
     // console.log("cameraPosition", cameraPosition)
     // this.verticalCameraRotation(this.state.cameraPosition, this.state.getRotation()[1], target)
-    var cameraMatrix = lookAt(cameraPosition, target, [0, 1, 0])
 
+    var cameraMatrix = lookAt(cameraPosition, target, [0, 1, 0])
+    
     var viewMatrix = inverse(cameraMatrix)
 
     var viewProjectionMatrix = multiply4(perspective, viewMatrix)

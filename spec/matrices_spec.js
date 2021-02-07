@@ -267,7 +267,7 @@ describe("angle_between_vectors", () => {
     it("returns a smaller than 90 degree result", () => {
       var x_axis_vector = [1, 0, 0]
       var camera_vector = [-128, -31, -317 ]
-      console.log(angle_between_vectors(camera_vector, x_axis_vector))
+      // console.log(angle_between_vectors(camera_vector, x_axis_vector))
     })
   })
 })
