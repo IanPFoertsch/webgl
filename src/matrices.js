@@ -308,6 +308,7 @@ var vector_addition = function(vector_a, vector_b) {
 }
 
 var vector_subtraction = function(vector_a, vector_b) {
+
   if (vector_a.length !== 3 || vector_b.length !== 3) {
     throw new Error("Attempting to subtract vectors not equal to length 3")
   }
