@@ -56,7 +56,9 @@ class RotationHandler {
 
 class TranslationUpdate {
   constructor(event) {
-    this.translation = [event.movementX, event.movementY, 0.0]
+    //we want to move in horizontal plane, so remap our Y mouse input to z-axis
+    //movement in world
+    this.translation = [event.movementX, 0.0, event.movementY]
     this.rotation = [0.0, 0.0, 0.0]
   }
 }
