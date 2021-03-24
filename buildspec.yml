@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - apt-get update -y
+      - apt-get install -y
+      - npm install -y
+  pre_build:
+    commands:
+      - npm install --production
+  build:
+    commands:
+      - npm run compile
+      # - copy the dist/index.html & dist/main.js up to the distribution S3 folder
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      # - aws s3 sync dizst/ s3://webgl-test-bucket-2.
+artifacts:
+  files:
+    - dist/*
+  discard-paths: yes
