@@ -26,8 +26,7 @@ class CameraState {
     this.zoom = 300
     this.translation = [0, 0, 0]
     this.focalTarget = [0.0, 0.0, 0.0]
-    
-    this.cameraPosition = initialization.camera_position
+    this.initial_camera_position = initialization.camera_position
   }
 
   updateFromTranslationEvent(update) {
@@ -79,7 +78,7 @@ class CameraState {
     // var matrix = multiply4(x_rotate, y_rotate)
     // matrix = multiply4(matrix, translate)
 
-    var starting_point = [0,0,- this.zoom, 1]
+    var starting_point = [this.initial_camera_position, 1].flat()
     var x_rotated = vectorMatrixMultiply(starting_point, x_rotate)
     var y_rotated = vectorMatrixMultiply(x_rotated, y_rotate)
 
