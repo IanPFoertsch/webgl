@@ -9,6 +9,8 @@ import {
   vectorMatrixMultiply,
 } from "../matrices.js"
 
+import initialization from "../../config/init.json"
+
 // degrees => radians
 // radians = degrees * (PI/180)
 var degrees_to_radians = function(degrees) {
@@ -24,7 +26,8 @@ class CameraState {
     this.zoom = 300
     this.translation = [0, 0, 0]
     this.focalTarget = [0.0, 0.0, 0.0]
-    this.cameraPosition = [300, 0.0, 0]
+    
+    this.cameraPosition = initialization.camera_position
   }
 
   updateFromTranslationEvent(update) {
