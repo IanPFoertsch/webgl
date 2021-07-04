@@ -23,7 +23,6 @@ class CameraState {
   constructor() {
     this.vertical_rotation = 0
     this.horizontal_rotation = 0
-    this.zoom = 300
     this.translation = [0, 0, 0]
     this.focalTarget = [0.0, 0.0, 0.0]
     this.initial_camera_position = initialization.camera_position
@@ -68,7 +67,7 @@ class CameraState {
     // start with a camera position of 0,0,- zoom
     // console.log(this.translation)
     var y_rotate = yRotationMatrix(this.horizontal_rotation)
-    var x_rotate = xRotationMatrix(this.vertical_rotation)
+    var x_rotate =  xRotationMatrix(this.vertical_rotation)
 
     var translate = translationMatrix(this.translation[0], this.translation[1], this.translation[2])
     //TODO: This should really work: we should be able to multiply the matrices together, then apply the
